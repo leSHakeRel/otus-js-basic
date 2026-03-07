@@ -147,7 +147,7 @@ describe("runApp function", () => {
       runApp(mockElement, testFunction);
 
       expect(mockElement.innerHTML).toBe(
-        "<h1 class=\"neon-text\">() => 'test'</h1>",
+        '<h1 class="neon-text">() => "test"</h1>',
       );
       expect(consoleWarnSpy).not.toHaveBeenCalled();
     });
