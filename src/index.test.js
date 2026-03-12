@@ -14,7 +14,7 @@ describe("main application entry point", () => {
   });
 
   afterEach(() => {
-    document.body.innerHTML = "";
+    document.body.innerHTML = originalDocumentBody;
   });
 
   test('should import and call runApp with document.body and "Hello, world!"', () => {
