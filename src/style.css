@@ -1,0 +1,107 @@
+body {
+  background-color: #556;
+  background-image:
+    linear-gradient(
+      30deg,
+      #445 12%,
+      transparent 12.5%,
+      transparent 87%,
+      #445 87.5%,
+      #445
+    ),
+    linear-gradient(
+      150deg,
+      #445 12%,
+      transparent 12.5%,
+      transparent 87%,
+      #445 87.5%,
+      #445
+    ),
+    linear-gradient(
+      30deg,
+      #445 12%,
+      transparent 12.5%,
+      transparent 87%,
+      #445 87.5%,
+      #445
+    ),
+    linear-gradient(
+      150deg,
+      #445 12%,
+      transparent 12.5%,
+      transparent 87%,
+      #445 87.5%,
+      #445
+    ),
+    linear-gradient(
+      60deg,
+      #99a 25%,
+      transparent 25.5%,
+      transparent 75%,
+      #99a 75%,
+      #99a
+    ),
+    linear-gradient(
+      60deg,
+      #99a 25%,
+      transparent 25.5%,
+      transparent 75%,
+      #99a 75%,
+      #99a
+    );
+  background-size: 80px 140px;
+  background-position:
+    0 0,
+    0 0,
+    40px 70px,
+    40px 70px,
+    0 0,
+    40px 70px;
+}
+
+h1 {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  font-family:
+    Open Sans,
+    sans-serif;
+  color: #fff;
+  font-weight: 400;
+  text-transform: uppercase;
+  text-align: center;
+  font-size: 2em;
+  padding: 5px;
+}
+
+.neon-text {
+  font-size: 4rem;
+  color: #fff;
+  text-shadow:
+    0 0 5px #ff005e,
+    0 0 10px #ff005e,
+    0 0 20px #ff005e,
+    0 0 40px #ff005e,
+    0 0 80px #ff005e;
+  animation: glow 1.5s infinite alternate;
+}
+
+@keyframes glow {
+  0% {
+    text-shadow:
+      0 0 5px #ff005e,
+      0 0 10px #ff005e,
+      0 0 20px #ff005e,
+      0 0 40px #ff005e,
+      0 0 80px #ff005e;
+  }
+  100% {
+    text-shadow:
+      0 0 10px #00d4ff,
+      0 0 20px #00d4ff,
+      0 0 40px #00d4ff,
+      0 0 80px #00d4ff,
+      0 0 160px #00d4ff;
+  }
+}
