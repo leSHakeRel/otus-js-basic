@@ -18,12 +18,29 @@ const windIcon = `
 `;
 
 /**
+ * Получение IP-адреса
+ * @returns {string} - IP-адрес
+ */
+async function getPublicIP() {
+  try {
+    const response = await fetch("https://api.ipify.org?format=json");
+    const data = await response.json();
+    return data.ip;
+  } catch (error) {
+    console.error("Ошибка:", error);
+    throw error;
+  }
+}
+
+/**
  * Получение кода локации по IP-адресу
  * @returns {object} - Данные локации
  */
 async function getLocationByIP() {
   try {
+    const ip = await getPublicIP();
     const url = new URL(`${apiConfig.BASE_URL}/locations/v1/cities/ipaddress`);
+    url.searchParams.append("q", ip);
     url.searchParams.append("details", "true");
 
     const response = await fetch(url, {
@@ -46,6 +63,7 @@ async function getLocationByIP() {
     }
 
     const data = await response.json();
+    console.log(data);
 
     return {
       key: data.Key,
@@ -155,10 +173,25 @@ async function getCurrentWeather(locationKey) {
  */
 export async function displayWeatherWithIcon(weatherIconCode) {
   const img = document.createElement("img");
-  img.src = `https://cdn.discover.swiss/icons/weather/ds-weather-${weatherIconCode}.svg`;
-  img.width = weatherIconCode?.width !== undefined ? weatherIconCode.width : 64;
-  img.height =
-    weatherIconCode?.height !== undefined ? weatherIconCode.height : 64;
+
+  let iconCode;
+  if (typeof weatherIconCode === "object" && weatherIconCode !== null) {
+    iconCode = weatherIconCode.weatherIconCode;
+  } else {
+    iconCode = weatherIconCode;
+  }
+
+  img.src = `https://cdn.discover.swiss/icons/weather/ds-weather-${iconCode}.svg`;
+
+  if (typeof weatherIconCode === "object" && weatherIconCode !== null) {
+    img.width =
+      weatherIconCode.width !== undefined ? weatherIconCode.width : 64;
+    img.height =
+      weatherIconCode.height !== undefined ? weatherIconCode.height : 64;
+  } else {
+    img.width = 64;
+    img.height = 64;
+  }
 
   return img;
 }

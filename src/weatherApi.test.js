@@ -28,9 +28,20 @@ describe("weatherApi", () => {
       Key: "12345",
       LocalizedName: "Moscow",
       Country: { LocalizedName: "Russia" },
+      TimeZone: { Name: "Europe/Moscow" },
+      GeoPosition: { Latitude: 55.75, Longitude: 37.62 },
+    };
+
+    const mockIpResponse = {
+      ip: "8.8.8.8",
     };
 
     test("should get weather data by IP (auto)", async () => {
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockIpResponse,
+      });
+
       fetch.mockResolvedValueOnce({
         ok: true,
         json: async () => mockLocationResponse,
@@ -43,7 +54,7 @@ describe("weatherApi", () => {
 
       const result = await getWeatherData({ type: "auto", cityName: "" });
 
-      expect(fetch).toHaveBeenCalledTimes(2);
+      expect(fetch).toHaveBeenCalledTimes(3);
       expect(result.temperature).toBe(20);
       expect(result.weatherText).toBe("Sunny");
     });
@@ -72,6 +83,11 @@ describe("weatherApi", () => {
     });
 
     test("should handle API error in location request", async () => {
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockIpResponse,
+      });
+
       fetch.mockResolvedValueOnce({
         ok: false,
         status: 401,
@@ -108,6 +124,17 @@ describe("weatherApi", () => {
         getWeatherData({ type: "city", cityName: "Moscow" }),
       ).rejects.toThrow("Данные о погоде не найдены");
     });
+
+    test("should handle IP fetch error", async () => {
+      fetch.mockRejectedValueOnce(new Error("Network error"));
+
+      await expect(getWeatherData({ type: "auto" })).rejects.toThrow(
+        "Network error",
+      );
+
+      expect(fetch).toHaveBeenCalledTimes(1);
+      expect(fetch).toHaveBeenCalledWith("https://api.ipify.org?format=json");
+    });
   });
 
   describe("displayWeatherWithIcon", () => {
@@ -121,11 +148,23 @@ describe("weatherApi", () => {
     });
 
     test("should create image element with custom size", async () => {
-      const iconCode = { weatherIconCode: 5, width: 100, height: 100 };
-      const img = await displayWeatherWithIcon(iconCode);
+      const iconConfig = { weatherIconCode: 5, width: 100, height: 100 };
+      const img = await displayWeatherWithIcon(iconConfig);
 
+      expect(img).toBeInstanceOf(HTMLImageElement);
+      expect(img.src).toContain("ds-weather-5.svg");
       expect(img.width).toBe(100);
       expect(img.height).toBe(100);
+    });
+
+    test("should handle icon code as object without custom size", async () => {
+      const iconConfig = { weatherIconCode: 10 };
+      const img = await displayWeatherWithIcon(iconConfig);
+
+      expect(img).toBeInstanceOf(HTMLImageElement);
+      expect(img.src).toContain("ds-weather-10.svg");
+      expect(img.width).toBe(64);
+      expect(img.height).toBe(64);
     });
   });
 });
