@@ -1,0 +1,40 @@
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 100px);
+  grid-template-rows: repeat(3, 100px);
+  gap: 10px;
+}
+
+.grid-item {
+  background: #4caf50;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  border: 1px solid transparent;
+  border-radius: 8px;
+}
+
+.temperatureCell {
+  grid-column: 1 / 3;
+  grid-row: 1 / 3;
+  background: #2e7d32;
+}
+
+.grid-item.temperatureCell {
+  display: flex;
+  flex-direction: column;
+}
+
+.cellItem {
+  display: flex;
+  flex-direction: column;
+  /* gap: 10px; */
+  align-items: center;
+}
+
+.cellItem p {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}

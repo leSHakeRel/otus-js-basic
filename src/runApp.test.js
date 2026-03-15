@@ -1,252 +1,160 @@
-/**
- * @jest-environment jsdom
- */
-
 import { runApp } from "./runApp";
+import { getWeatherData } from "./weatherApi";
+import { getWeatherSearchUI } from "./weatherSearch";
+import { getWeatherResultUI, setWeatherData } from "./weatherResult";
 
-jest.mock("./style.css", () => ({}), { virtual: true });
+jest.mock("./weatherApi");
+jest.mock("./weatherSearch");
+jest.mock("./weatherResult");
 
-describe("runApp function", () => {
-  let consoleWarnSpy;
+describe("runApp", () => {
+  let mockElement;
+  let mockForm;
+  let mockMainContainer;
+  let mockResultContainer;
 
   beforeEach(() => {
-    consoleWarnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+    jest.clearAllMocks();
+
+    mockForm = document.createElement("form");
+    mockForm.id = "locationForm";
+    mockForm.addEventListener = jest.fn();
+
+    mockElement = {
+      append: jest.fn(),
+      querySelector: jest.fn().mockReturnValue(mockForm),
+    };
+
+    document.createElement = jest.fn().mockImplementation((tag) => {
+      if (tag === "div") {
+        mockMainContainer = {
+          classList: {
+            add: jest.fn(),
+          },
+          append: jest.fn(),
+        };
+        return mockMainContainer;
+      }
+      if (tag === "section") {
+        mockResultContainer = {
+          classList: {
+            add: jest.fn(),
+          },
+        };
+        return mockResultContainer;
+      }
+      return {};
+    });
   });
 
-  afterEach(() => {
-    consoleWarnSpy.mockRestore();
+  test("should log a warning if element is not an object", () => {
+    console.warn = jest.fn();
+
+    runApp(null);
+
+    expect(console.warn).toHaveBeenCalledWith("element null is not object");
   });
 
-  describe("successful execution with object element", () => {
-    test("should set innerHTML with provided text", () => {
-      const mockElement = { innerHTML: "" };
-      const testText = "Hello, World!";
+  test("should create main container and append it to the element", () => {
+    runApp(mockElement);
 
-      runApp(mockElement, testText);
+    expect(document.createElement).toHaveBeenCalledWith("div");
+    expect(mockMainContainer.classList.add).toHaveBeenCalledWith(
+      "main-container",
+    );
+    expect(mockElement.append).toHaveBeenCalledWith(mockMainContainer);
+  });
 
-      expect(mockElement.innerHTML).toBe(
-        '<h1 class="neon-text">Hello, World!</h1>',
-      );
-      expect(consoleWarnSpy).not.toHaveBeenCalled();
-    });
+  test("should call getWeatherSearchUI with mainContainer", () => {
+    runApp(mockElement);
 
-    test("should handle empty string as text", () => {
-      const mockElement = { innerHTML: "" };
-      const testText = "";
+    expect(getWeatherSearchUI).toHaveBeenCalledWith(mockMainContainer);
+  });
 
-      runApp(mockElement, testText);
+  test("should find the form and add submit event listener", () => {
+    runApp(mockElement);
 
-      expect(mockElement.innerHTML).toBe('<h1 class="neon-text"></h1>');
-      expect(consoleWarnSpy).not.toHaveBeenCalled();
-    });
+    expect(mockElement.querySelector).toHaveBeenCalledWith("#locationForm");
+    expect(mockForm.addEventListener).toHaveBeenCalledWith(
+      "submit",
+      expect.any(Function),
+    );
+  });
 
-    test("should handle text with special characters", () => {
-      const mockElement = { innerHTML: "" };
-      const testText = "Hello & Welcome to <JavaScript>!";
+  test("should create and append resultContainer with correct class", () => {
+    runApp(mockElement);
 
-      runApp(mockElement, testText);
+    expect(document.createElement).toHaveBeenCalledWith("section");
+    expect(mockResultContainer.classList.add).toHaveBeenCalledWith("row");
+    expect(getWeatherResultUI).toHaveBeenCalledWith(mockResultContainer);
+    expect(mockMainContainer.append).toHaveBeenCalledWith(mockResultContainer);
+  });
 
-      expect(mockElement.innerHTML).toBe(
-        '<h1 class="neon-text">Hello & Welcome to <JavaScript>!</h1>',
-      );
-      expect(consoleWarnSpy).not.toHaveBeenCalled();
-    });
+  describe("form submit handler", () => {
+    let submitHandler;
 
-    test("should handle text with numbers", () => {
-      const mockElement = { innerHTML: "" };
-      const testText = "12345";
-
-      runApp(mockElement, testText);
-
-      expect(mockElement.innerHTML).toBe('<h1 class="neon-text">12345</h1>');
-      expect(consoleWarnSpy).not.toHaveBeenCalled();
-    });
-
-    test("should handle multiline text", () => {
-      const mockElement = { innerHTML: "" };
-      const testText = "Hello\nWorld\nTest";
-
-      runApp(mockElement, testText);
-
-      expect(mockElement.innerHTML).toBe(
-        '<h1 class="neon-text">Hello\nWorld\nTest</h1>',
-      );
-      expect(consoleWarnSpy).not.toHaveBeenCalled();
-    });
-
-    test("should handle undefined text parameter", () => {
-      const mockElement = { innerHTML: "" };
-
+    beforeEach(() => {
       runApp(mockElement);
 
-      expect(mockElement.innerHTML).toBe(
-        '<h1 class="neon-text">undefined</h1>',
-      );
-      expect(consoleWarnSpy).not.toHaveBeenCalled();
+      submitHandler = mockForm.addEventListener.mock.calls.find(
+        (call) => call[0] === "submit",
+      )[1];
     });
 
-    test("should handle null as text parameter", () => {
-      const mockElement = { innerHTML: "" };
+    test("should handle form submit with correct data", async () => {
+      const mockEvent = {
+        preventDefault: jest.fn(),
+      };
 
-      runApp(mockElement, null);
+      const mockFormData = {
+        get: jest
+          .fn()
+          .mockReturnValueOnce("city")
+          .mockReturnValueOnce("London"),
+      };
+      global.FormData = jest.fn().mockReturnValue(mockFormData);
 
-      expect(mockElement.innerHTML).toBe('<h1 class="neon-text">null</h1>');
-      expect(consoleWarnSpy).not.toHaveBeenCalled();
-    });
+      const mockWeatherData = { temperature: 20, condition: "sunny" };
+      getWeatherData.mockResolvedValue(mockWeatherData);
 
-    test("should handle boolean as text parameter", () => {
-      const mockElement = { innerHTML: "" };
+      await submitHandler(mockEvent);
 
-      runApp(mockElement, true);
-      expect(mockElement.innerHTML).toBe('<h1 class="neon-text">true</h1>');
-
-      runApp(mockElement, false);
-      expect(mockElement.innerHTML).toBe('<h1 class="neon-text">false</h1>');
-
-      expect(consoleWarnSpy).not.toHaveBeenCalled();
-    });
-
-    test("should handle number as text parameter", () => {
-      const mockElement = { innerHTML: "" };
-
-      runApp(mockElement, 42);
-      expect(mockElement.innerHTML).toBe('<h1 class="neon-text">42</h1>');
-
-      runApp(mockElement, 3.14);
-      expect(mockElement.innerHTML).toBe('<h1 class="neon-text">3.14</h1>');
-
-      expect(consoleWarnSpy).not.toHaveBeenCalled();
-    });
-
-    test("should handle object as text parameter", () => {
-      const mockElement = { innerHTML: "" };
-      const testObject = { key: "value" };
-
-      runApp(mockElement, testObject);
-
-      expect(mockElement.innerHTML).toBe(
-        '<h1 class="neon-text">[object Object]</h1>',
-      );
-      expect(consoleWarnSpy).not.toHaveBeenCalled();
-    });
-
-    test("should handle array as text parameter", () => {
-      const mockElement = { innerHTML: "" };
-      const testArray = [1, 2, 3];
-
-      runApp(mockElement, testArray);
-
-      expect(mockElement.innerHTML).toBe('<h1 class="neon-text">1,2,3</h1>');
-      expect(consoleWarnSpy).not.toHaveBeenCalled();
-    });
-
-    test("should handle function as text parameter", () => {
-      const mockElement = { innerHTML: "" };
-      const testFunction = () => "test";
-
-      runApp(mockElement, testFunction);
-
-      expect(mockElement.innerHTML).toBe(
-        '<h1 class="neon-text">() => "test"</h1>',
-      );
-      expect(consoleWarnSpy).not.toHaveBeenCalled();
-    });
-  });
-
-  describe("warning scenarios when element is not object", () => {
-    const nonObjectCases = [
-      { value: undefined, expectedLog: "element undefined is not object" },
-      { value: 42, expectedLog: "element 42 is not object" },
-      { value: "string", expectedLog: "element string is not object" },
-      { value: true, expectedLog: "element true is not object" },
-      { value: false, expectedLog: "element false is not object" },
-    ];
-
-    nonObjectCases.forEach(({ value, expectedLog }) => {
-      test(`should log warning for ${String(value)} element`, () => {
-        const mockElement = { innerHTML: "initial content" };
-        const testText = "some text";
-
-        runApp(value, testText);
-
-        expect(mockElement.innerHTML).toBe("initial content");
-        expect(consoleWarnSpy).toHaveBeenCalledWith(expectedLog);
+      expect(mockEvent.preventDefault).toHaveBeenCalled();
+      expect(FormData).toHaveBeenCalledWith(mockForm);
+      expect(mockFormData.get).toHaveBeenCalledWith("searchType");
+      expect(mockFormData.get).toHaveBeenCalledWith("cityName");
+      expect(getWeatherData).toHaveBeenCalledWith({
+        type: "city",
+        cityName: "London",
       });
+      expect(setWeatherData).toHaveBeenCalledWith(mockWeatherData);
     });
 
-    test("should not modify element and log warning for non-object element with various text parameters", () => {
-      const mockElement = { innerHTML: "initial" };
-      const textCases = ["text", "", null, undefined, 123, true];
+    test("should handle error when fetching weather data", async () => {
+      const mockEvent = {
+        preventDefault: jest.fn(),
+      };
 
-      textCases.forEach((text) => {
-        runApp("not an object", text);
+      console.error = jest.fn();
 
-        expect(mockElement.innerHTML).toBe("initial");
-        expect(consoleWarnSpy).toHaveBeenCalledWith(
-          "element not an object is not object",
-        );
+      const mockError = new Error("Network error");
+      getWeatherData.mockRejectedValue(mockError);
 
-        consoleWarnSpy.mockClear();
-      });
-    });
-  });
+      await expect(submitHandler(mockEvent)).rejects.toThrow("Network error");
 
-  describe("edge cases with object-like elements", () => {
-    test("should handle array as element", () => {
-      const arrayElement = [];
-      arrayElement.innerHTML = "";
-      const testText = "test";
-
-      runApp(arrayElement, testText);
-
-      expect(arrayElement.innerHTML).toBe('<h1 class="neon-text">test</h1>');
-      expect(consoleWarnSpy).not.toHaveBeenCalled();
-    });
-
-    test("should handle Date object as element", () => {
-      const dateElement = new Date();
-      dateElement.innerHTML = "";
-      const testText = "test";
-
-      runApp(dateElement, testText);
-
-      expect(dateElement.innerHTML).toBe('<h1 class="neon-text">test</h1>');
-      expect(consoleWarnSpy).not.toHaveBeenCalled();
-    });
-
-    test("should handle RegExp object as element", () => {
-      const regexpElement = /test/;
-      regexpElement.innerHTML = "";
-      const testText = "test";
-
-      runApp(regexpElement, testText);
-
-      expect(regexpElement.innerHTML).toBe('<h1 class="neon-text">test</h1>');
-      expect(consoleWarnSpy).not.toHaveBeenCalled();
+      expect(console.error).toHaveBeenCalledWith(
+        "Ошибка получении погоды:",
+        mockError,
+      );
     });
   });
 
-  describe("integration with real DOM (if using jsdom)", () => {
-    test("should work with actual DOM element", () => {
-      document.body.innerHTML = '<div id="test"></div>';
-      const element = document.getElementById("test");
-      const testText = "DOM Test";
+  test("should not add event listener if form is not found", () => {
+    mockElement.querySelector.mockReturnValue(null);
 
-      runApp(element, testText);
+    runApp(mockElement);
 
-      expect(element.innerHTML).toBe('<h1 class="neon-text">DOM Test</h1>');
-      expect(consoleWarnSpy).not.toHaveBeenCalled();
-    });
-
-    test("should override existing content in DOM element", () => {
-      document.body.innerHTML = '<div id="test">Old content</div>';
-      const element = document.getElementById("test");
-      const testText = "New Content";
-
-      runApp(element, testText);
-
-      expect(element.innerHTML).toBe('<h1 class="neon-text">New Content</h1>');
-      expect(element.textContent).toBe("New Content");
-    });
+    expect(mockElement.querySelector).toHaveBeenCalledWith("#locationForm");
+    expect(mockForm.addEventListener).not.toHaveBeenCalled();
   });
 });
