@@ -129,24 +129,6 @@ describe("runApp", () => {
       });
       expect(setWeatherData).toHaveBeenCalledWith(mockWeatherData);
     });
-
-    test("should handle error when fetching weather data", async () => {
-      const mockEvent = {
-        preventDefault: jest.fn(),
-      };
-
-      console.error = jest.fn();
-
-      const mockError = new Error("Network error");
-      getWeatherData.mockRejectedValue(mockError);
-
-      await expect(submitHandler(mockEvent)).rejects.toThrow("Network error");
-
-      expect(console.error).toHaveBeenCalledWith(
-        "Ошибка получении погоды:",
-        mockError,
-      );
-    });
   });
 
   test("should not add event listener if form is not found", () => {

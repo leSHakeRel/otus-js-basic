@@ -1,5 +1,5 @@
 import "./weatherResult.css";
-import { displayWeatherWithIcon } from "./weatherApi.js";
+import { displayWeatherWithIcon, displayWindIcon } from "./weatherApi.js";
 
 /**
  * Добавление UI для отображения погоды
@@ -39,7 +39,7 @@ export function getWeatherResultUI(element) {
         <div class='grid-item'>
             <div class='cellItem'>
                 <p>Направл.<br>ветра</p>
-                <p class='windDirectionValue'>
+                <div class='windDirectionIcon'></div>
             </div>
         </div>
         <div class='grid-item'>
@@ -70,13 +70,22 @@ export async function setWeatherData(weatherData) {
   fillCell(".feelTemperatureValue", weatherData.realFeel, "° C");
   fillCell(".weatherText", weatherData.weatherText);
 
-  fillCell(".pressureValue", weatherData.pressure, " мм р.с.");
+  fillCell(
+    ".pressureValue",
+    Math.round(weatherData.pressure * 0.7506),
+    " мм р.с.",
+  );
   fillCell(".windSpeedValue", weatherData.windSpeed, " км/ч");
-  fillCell(".windDirectionValue", weatherData.windDirection);
+  //   fillCell(".windDirectionValue", weatherData.windDirection);
   fillCell(".uvIndexValue", weatherData.uvIndex);
 
   const icon = await displayWeatherWithIcon(weatherData.weatherIcon);
   const iconElement = document.querySelector(".weatherIcon");
   iconElement.replaceChildren();
   iconElement.append(icon);
+
+  const windIcon = await displayWindIcon(weatherData.Wind.Direction.Degrees);
+  const windDirectionIcon = document.querySelector(".windDirectionIcon");
+  windDirectionIcon.replaceChildren();
+  windDirectionIcon.append(windIcon);
 }

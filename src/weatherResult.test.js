@@ -1,8 +1,9 @@
 import { getWeatherResultUI, setWeatherData } from "./weatherResult";
-import { displayWeatherWithIcon } from "./weatherApi";
+import { displayWeatherWithIcon, displayWindIcon } from "./weatherApi";
 
 jest.mock("./weatherApi", () => ({
   displayWeatherWithIcon: jest.fn(),
+  displayWindIcon: jest.fn(),
 }));
 
 jest.mock("./weatherResult.css", () => ({}), { virtual: true });
@@ -27,7 +28,7 @@ describe("weatherResult", () => {
       expect(element.querySelector(".feelTemperatureValue")).toBeTruthy();
       expect(element.querySelector(".pressureValue")).toBeTruthy();
       expect(element.querySelector(".windSpeedValue")).toBeTruthy();
-      expect(element.querySelector(".windDirectionValue")).toBeTruthy();
+      expect(element.querySelector(".windDirectionIcon")).toBeTruthy();
       expect(element.querySelector(".uvIndexValue")).toBeTruthy();
     });
 
@@ -60,6 +61,11 @@ describe("weatherResult", () => {
         windDirection: "N",
         uvIndex: 4,
         weatherIcon: 1,
+        Wind: {
+          Direction: {
+            Degrees: 90,
+          },
+        },
       };
 
       const mockIcon = document.createElement("img");
@@ -75,12 +81,11 @@ describe("weatherResult", () => {
       );
       expect(document.querySelector(".weatherText").innerHTML).toBe("Sunny");
       expect(document.querySelector(".pressureValue").innerHTML).toBe(
-        "1013 мм р.с.",
+        "760 мм р.с.",
       );
       expect(document.querySelector(".windSpeedValue").innerHTML).toBe(
         "5 км/ч",
       );
-      expect(document.querySelector(".windDirectionValue").innerHTML).toBe("N");
       expect(document.querySelector(".uvIndexValue").innerHTML).toBe("4");
 
       expect(displayWeatherWithIcon).toHaveBeenCalledWith(1);
@@ -98,6 +103,11 @@ describe("weatherResult", () => {
         windDirection: null,
         uvIndex: undefined,
         weatherIcon: 2,
+        Wind: {
+          Direction: {
+            Degrees: 90,
+          },
+        },
       };
 
       const mockIcon = document.createElement("img");
@@ -108,7 +118,6 @@ describe("weatherResult", () => {
       expect(document.querySelector(".feelTemperatureValue").innerHTML).toBe(
         "° C",
       );
-      expect(document.querySelector(".windDirectionValue").innerHTML).toBe("");
       expect(document.querySelector(".uvIndexValue").innerHTML).toBe("");
     });
 
@@ -123,6 +132,11 @@ describe("weatherResult", () => {
         pressure: 1010,
         windSpeed: 3,
         weatherIcon: 2,
+        Wind: {
+          Direction: {
+            Degrees: 90,
+          },
+        },
       });
 
       const iconContainer = document.querySelector(".weatherIcon");
@@ -139,6 +153,11 @@ describe("weatherResult", () => {
         pressure: 1012,
         windSpeed: 4,
         weatherIcon: 3,
+        Wind: {
+          Direction: {
+            Degrees: 90,
+          },
+        },
       });
 
       expect(iconContainer.children.length).toBe(1);

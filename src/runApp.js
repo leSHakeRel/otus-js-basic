@@ -18,6 +18,11 @@ export function runApp(element) {
     const resultContainer = document.createElement("section");
     resultContainer.classList.add("row");
 
+    const applyWeatherData = async (searchData) => {
+      const weather = await getWeatherData(searchData);
+      setWeatherData(weather);
+    };
+
     const form = element.querySelector("#locationForm");
     if (form) {
       form.addEventListener("submit", async (event) => {
@@ -30,18 +35,38 @@ export function runApp(element) {
         };
 
         try {
-          const weather = await getWeatherData(searchData);
-
-          setWeatherData(weather);
+          await applyWeatherData(searchData);
         } catch (error) {
           console.error("Ошибка получении погоды:", error);
           throw error;
         }
+
+        localStorage.setItem("searchData", JSON.stringify(searchData));
       });
     }
 
     getWeatherResultUI(resultContainer);
     mainContainer.append(resultContainer);
+
+    const loadedData = localStorage.getItem("searchData");
+
+    if (loadedData) {
+      const jsonLoadedData = JSON.parse(loadedData);
+      if (jsonLoadedData.type === "city") {
+        const cityRadioButton = element.querySelector("#cityNameSearch");
+        if (cityRadioButton) cityRadioButton.checked = true;
+
+        const cityNameInput = element.querySelector(".cityNameInput");
+        if (cityNameInput) cityNameInput.value = jsonLoadedData.cityName;
+        if (cityNameInput && cityNameInput.style)
+          cityNameInput.style.display = "block";
+      }
+      try {
+        applyWeatherData(jsonLoadedData);
+      } catch (error) {
+        console.error("Ошибка получении погоды:", error);
+      }
+    }
   } else {
     console.warn(`element ${element} is not object`);
   }
