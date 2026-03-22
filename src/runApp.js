@@ -19,7 +19,22 @@ export function runApp(element) {
     resultContainer.classList.add("row");
 
     const applyWeatherData = async (searchData) => {
-      const weather = await getWeatherData(searchData);
+      let weather;
+      try {
+        const weatherData = await getWeatherData(searchData);
+        weather = {
+          status: true,
+          message: "",
+          weather: weatherData,
+        };
+      } catch (err) {
+        console.error("Ошибка запроса", err);
+        weather = {
+          status: false,
+          message: err.message,
+          weather: undefined,
+        };
+      }
       setWeatherData(weather);
     };
 

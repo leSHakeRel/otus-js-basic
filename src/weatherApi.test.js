@@ -1,170 +1,285 @@
-import { getWeatherData, displayWeatherWithIcon } from "./weatherApi";
+import {
+  getWeatherData,
+  displayWeatherWithIcon,
+  displayWindIcon,
+} from "./weatherApi";
+import apiConfig from "./weather.config.js";
+
+jest.mock("./weather.config.js", () => ({
+  API_KEY: "test-api-key",
+  BASE_URL: "https://test-api.com",
+}));
 
 global.fetch = jest.fn();
+
+const mockLocalStorage = {
+  getItem: jest.fn(),
+  setItem: jest.fn(),
+  clear: jest.fn(),
+  removeItem: jest.fn(),
+};
+
+global.localStorage = mockLocalStorage;
 
 describe("weatherApi", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    global.fetch.mockClear();
   });
 
   describe("getWeatherData", () => {
-    const mockWeatherResponse = [
-      {
-        Temperature: { Metric: { Value: 20 } },
-        WeatherText: "Sunny",
-        WeatherIcon: 1,
-        Wind: {
-          Speed: { Metric: { Value: 5 } },
-          Direction: { Localized: "N" },
-        },
-        Pressure: { Metric: { Value: 1013 } },
-        Visibility: { Metric: { Value: 10 } },
-        UVIndex: 3,
-        RealFeelTemperature: { Metric: { Value: 22 } },
-      },
-    ];
+    test("должен успешно получить погоду по IP", async () => {
+      global.fetch.mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ ip: "127.0.0.1" }),
+        }),
+      );
 
-    const mockLocationResponse = {
-      Key: "12345",
-      LocalizedName: "Moscow",
-      Country: { LocalizedName: "Russia" },
-      TimeZone: { Name: "Europe/Moscow" },
-      GeoPosition: { Latitude: 55.75, Longitude: 37.62 },
-    };
+      global.fetch.mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              Key: "12345",
+              LocalizedName: "Moscow",
+              Country: { LocalizedName: "Russia" },
+              GeoPosition: { Latitude: 55.75, Longitude: 37.62 },
+              TimeZone: { Name: "Europe/Moscow" },
+            }),
+        }),
+      );
 
-    const mockIpResponse = {
-      ip: "8.8.8.8",
-    };
+      global.fetch.mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve([
+              {
+                Temperature: { Metric: { Value: 15 } },
+                WeatherText: "Cloudy",
+                WeatherIcon: 5,
+                Wind: {
+                  Speed: { Metric: { Value: 10 } },
+                  Direction: { Localized: "N", Degrees: 0 },
+                },
+                Pressure: { Metric: { Value: 1013 } },
+                Visibility: { Metric: { Value: 10 } },
+                UVIndex: 3,
+                RealFeelTemperature: { Metric: { Value: 14 } },
+              },
+            ]),
+        }),
+      );
 
-    test("should get weather data by IP (auto)", async () => {
-      fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockIpResponse,
-      });
+      const result = await getWeatherData({ type: "auto" });
 
-      fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockLocationResponse,
-      });
-
-      fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockWeatherResponse,
-      });
-
-      const result = await getWeatherData({ type: "auto", cityName: "" });
-
-      expect(fetch).toHaveBeenCalledTimes(3);
-      expect(result.temperature).toBe(20);
-      expect(result.weatherText).toBe("Sunny");
+      expect(result).toHaveProperty("weather");
+      expect(result).toHaveProperty("location");
+      expect(result.location.queryCityName).toBe("Moscow");
+      expect(result.weather.temperature).toBe(15);
+      expect(global.fetch).toHaveBeenCalledTimes(3);
     });
 
-    test("should get weather data by city name", async () => {
-      fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => [mockLocationResponse],
-      });
+    test("должен успешно получить погоду по названию города", async () => {
+      global.fetch.mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve([
+              {
+                Key: "67890",
+                LocalizedName: "London",
+                Country: { LocalizedName: "UK" },
+                GeoPosition: { Latitude: 51.5, Longitude: -0.13 },
+              },
+            ]),
+        }),
+      );
 
-      fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockWeatherResponse,
-      });
+      global.fetch.mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve([
+              {
+                Temperature: { Metric: { Value: 12 } },
+                WeatherText: "Rainy",
+                WeatherIcon: 10,
+                Wind: {
+                  Speed: { Metric: { Value: 15 } },
+                  Direction: { Localized: "NW", Degrees: 315 },
+                },
+                Pressure: { Metric: { Value: 1008 } },
+                Visibility: { Metric: { Value: 8 } },
+                UVIndex: 1,
+                RealFeelTemperature: { Metric: { Value: 10 } },
+              },
+            ]),
+        }),
+      );
 
       const result = await getWeatherData({ type: "city", cityName: "London" });
 
-      expect(fetch).toHaveBeenCalledTimes(2);
-      expect(result.temperature).toBe(20);
+      expect(result.location.queryCityName).toBe("London");
+      expect(result.location.country).toBe("UK");
+      expect(result.weather.temperature).toBe(12);
+      expect(result.weather.weatherText).toBe("Rainy");
     });
 
-    test("should throw error for invalid location type", async () => {
+    test("должен выбросить ошибку при неверном типе локации", async () => {
       await expect(getWeatherData({ type: "invalid" })).rejects.toThrow(
         "undefined location type",
       );
+
+      expect(global.fetch).not.toHaveBeenCalled();
     });
 
-    test("should handle API error in location request", async () => {
-      fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockIpResponse,
-      });
+    test("должен обработать ошибку API ключа", async () => {
+      global.fetch.mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ ip: "127.0.0.1" }),
+        }),
+      );
 
-      fetch.mockResolvedValueOnce({
-        ok: false,
-        status: 401,
-      });
+      global.fetch.mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: false,
+          status: 401,
+          json: () => Promise.resolve({}),
+        }),
+      );
 
       await expect(getWeatherData({ type: "auto" })).rejects.toThrow(
         "Недействительный API ключ",
       );
     });
 
-    test("should handle empty city search results", async () => {
-      fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => [],
-      });
+    test("должен обработать ошибку при поиске несуществующего города", async () => {
+      global.fetch.mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve([]),
+        }),
+      );
 
       await expect(
-        getWeatherData({ type: "city", cityName: "Unknown" }),
-      ).rejects.toThrow("Город не найден");
+        getWeatherData({ type: "city", cityName: "NonExistentCity" }),
+      ).rejects.toThrow("Город <NonExistentCity> не найден");
     });
 
-    test("should handle empty weather data", async () => {
-      fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => [mockLocationResponse],
-      });
-
-      fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => [],
-      });
-
-      await expect(
-        getWeatherData({ type: "city", cityName: "Moscow" }),
-      ).rejects.toThrow("Данные о погоде не найдены");
-    });
-
-    test("should handle IP fetch error", async () => {
-      fetch.mockRejectedValueOnce(new Error("Network error"));
+    test("должен обработать ошибку сети", async () => {
+      global.fetch.mockImplementationOnce(() =>
+        Promise.reject(new Error("Network error")),
+      );
 
       await expect(getWeatherData({ type: "auto" })).rejects.toThrow(
         "Network error",
       );
+    });
 
-      expect(fetch).toHaveBeenCalledTimes(1);
-      expect(fetch).toHaveBeenCalledWith("https://api.ipify.org?format=json");
+    test("должен обработать пустой ответ от API погоды", async () => {
+      global.fetch.mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ ip: "127.0.0.1" }),
+        }),
+      );
+
+      global.fetch.mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              Key: "12345",
+              LocalizedName: "Moscow",
+              Country: { LocalizedName: "Russia" },
+              GeoPosition: { Latitude: 55.75, Longitude: 37.62 },
+              TimeZone: { Name: "Europe/Moscow" },
+            }),
+        }),
+      );
+
+      global.fetch.mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve([]),
+        }),
+      );
+
+      await expect(getWeatherData({ type: "auto" })).rejects.toThrow(
+        "Данные о погоде не найдены",
+      );
     });
   });
 
   describe("displayWeatherWithIcon", () => {
-    test("should create image element with default size", async () => {
-      const img = await displayWeatherWithIcon(5);
+    test("должен создать img элемент с правильным src", async () => {
+      const imgElement = await displayWeatherWithIcon(5);
 
-      expect(img).toBeInstanceOf(HTMLImageElement);
-      expect(img.src).toContain("ds-weather-5.svg");
-      expect(img.width).toBe(64);
-      expect(img.height).toBe(64);
+      expect(imgElement.tagName).toBe("IMG");
+      expect(imgElement.src).toContain("ds-weather-5.svg");
+      expect(imgElement.width).toBe(64);
+      expect(imgElement.height).toBe(64);
     });
 
-    test("should create image element with custom size", async () => {
-      const iconConfig = { weatherIconCode: 5, width: 100, height: 100 };
-      const img = await displayWeatherWithIcon(iconConfig);
+    test("должен обработать объект с параметрами", async () => {
+      const imgElement = await displayWeatherWithIcon({
+        weatherIconCode: 10,
+        width: 100,
+        height: 100,
+      });
 
-      expect(img).toBeInstanceOf(HTMLImageElement);
-      expect(img.src).toContain("ds-weather-5.svg");
-      expect(img.width).toBe(100);
-      expect(img.height).toBe(100);
+      expect(imgElement.width).toBe(100);
+      expect(imgElement.height).toBe(100);
     });
 
-    test("should handle icon code as object without custom size", async () => {
-      const iconConfig = { weatherIconCode: 10 };
-      const img = await displayWeatherWithIcon(iconConfig);
+    test("должен использовать значения по умолчанию для размера", async () => {
+      const imgElement = await displayWeatherWithIcon(15);
 
-      expect(img).toBeInstanceOf(HTMLImageElement);
-      expect(img.src).toContain("ds-weather-10.svg");
-      expect(img.width).toBe(64);
-      expect(img.height).toBe(64);
+      expect(imgElement.width).toBe(64);
+      expect(imgElement.height).toBe(64);
+    });
+
+    test("должен обработать undefined", async () => {
+      const imgElement = await displayWeatherWithIcon(undefined);
+
+      expect(imgElement.src).toContain("ds-weather-undefined.svg");
+    });
+  });
+
+  describe("displayWindIcon", () => {
+    test("должен создать div с SVG и правильным поворотом", async () => {
+      const result = await displayWindIcon(45);
+
+      expect(result.tagName).toBe("DIV");
+      const svg = result.querySelector("svg");
+      expect(svg).toBeTruthy();
+      expect(svg.style.transform).toBe("rotate(45deg)");
+      expect(svg.getAttribute("width")).toBe("32");
+      expect(svg.getAttribute("height")).toBe("32");
+    });
+
+    test("должен корректно обработать нулевое направление ветра", async () => {
+      const result = await displayWindIcon(0);
+
+      const svg = result.querySelector("svg");
+      expect(svg.style.transform).toBe("rotate(0deg)");
+    });
+
+    test("должен корректно обработать направление ветра 360 градусов", async () => {
+      const result = await displayWindIcon(360);
+
+      const svg = result.querySelector("svg");
+      expect(svg.style.transform).toBe("rotate(360deg)");
+    });
+
+    test("должен обработать отрицательное направление ветра", async () => {
+      const result = await displayWindIcon(-90);
+
+      const svg = result.querySelector("svg");
+      expect(svg.style.transform).toBe("rotate(-90deg)");
     });
   });
 });

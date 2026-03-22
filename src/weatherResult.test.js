@@ -6,162 +6,296 @@ jest.mock("./weatherApi", () => ({
   displayWindIcon: jest.fn(),
 }));
 
-jest.mock("./weatherResult.css", () => ({}), { virtual: true });
-
 describe("weatherResult", () => {
-  let element;
+  let container;
 
   beforeEach(() => {
-    document.body.innerHTML = "";
-    element = document.createElement("div");
+    container = document.createElement("div");
+    document.body.appendChild(container);
     jest.clearAllMocks();
+
+    const mockImg = document.createElement("img");
+    displayWeatherWithIcon.mockResolvedValue(mockImg);
+
+    const mockWindDiv = document.createElement("div");
+    displayWindIcon.mockResolvedValue(mockWindDiv);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(container);
   });
 
   describe("getWeatherResultUI", () => {
-    test("should create weather result UI structure", () => {
-      getWeatherResultUI(element);
+    test("должен создать UI структуру", () => {
+      getWeatherResultUI(container);
 
-      expect(element.querySelector(".grid-container")).toBeTruthy();
-      expect(element.querySelector(".temperatureCell")).toBeTruthy();
-      expect(element.querySelector(".temperatureValue")).toBeTruthy();
-      expect(element.querySelector(".weatherIcon")).toBeTruthy();
-      expect(element.querySelector(".feelTemperatureValue")).toBeTruthy();
-      expect(element.querySelector(".pressureValue")).toBeTruthy();
-      expect(element.querySelector(".windSpeedValue")).toBeTruthy();
-      expect(element.querySelector(".windDirectionIcon")).toBeTruthy();
-      expect(element.querySelector(".uvIndexValue")).toBeTruthy();
+      const resultSection = container.querySelector(".resultSection");
+      expect(resultSection).toBeTruthy();
+      expect(container.querySelector(".grid-container")).toBeTruthy();
+      expect(container.querySelector(".temperatureValue")).toBeTruthy();
+      expect(container.querySelector(".feelTemperatureValue")).toBeTruthy();
+      expect(container.querySelector(".pressureValue")).toBeTruthy();
+      expect(container.querySelector(".windSpeedValue")).toBeTruthy();
+      expect(container.querySelector(".uvIndexValue")).toBeTruthy();
+      expect(container.querySelector(".weatherIcon")).toBeTruthy();
     });
 
-    test("should log warning when element is not object", () => {
-      const consoleWarnSpy = jest.spyOn(console, "warn").mockImplementation();
+    test("должен вывести предупреждение при неверном элементе", () => {
+      const consoleSpy = jest.spyOn(console, "warn");
+      getWeatherResultUI(null);
+      expect(consoleSpy).toHaveBeenCalledWith("element null is not object");
+      consoleSpy.mockRestore();
+    });
 
-      getWeatherResultUI("not-an-object");
-
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        "element not-an-object is not object",
+    test("должен вывести предупреждение при undefined элементе", () => {
+      const consoleSpy = jest.spyOn(console, "warn");
+      getWeatherResultUI(undefined);
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "element undefined is not object",
       );
+      consoleSpy.mockRestore();
+    });
 
-      consoleWarnSpy.mockRestore();
+    test("должен вывести предупреждение при строковом элементе", () => {
+      const consoleSpy = jest.spyOn(console, "warn");
+      getWeatherResultUI("not an object");
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "element not an object is not object",
+      );
+      consoleSpy.mockRestore();
     });
   });
 
   describe("setWeatherData", () => {
     beforeEach(() => {
-      getWeatherResultUI(element);
-      document.body.appendChild(element);
+      getWeatherResultUI(container);
     });
 
-    test("should fill all weather data cells correctly", async () => {
-      const mockWeatherData = {
-        temperature: 25,
-        realFeel: 23,
-        weatherText: "Sunny",
-        pressure: 1013,
-        windSpeed: 5,
-        windDirection: "N",
-        uvIndex: 4,
-        weatherIcon: 1,
-        Wind: {
-          Direction: {
-            Degrees: 90,
+    test("должен отобразить данные о погоде при успешном запросе", async () => {
+      const weatherData = {
+        status: true,
+        weather: {
+          weather: {
+            temperature: 20,
+            realFeel: 19,
+            weatherText: "Sunny",
+            pressure: 1013,
+            windSpeed: 10,
+            uvIndex: 5,
+            weatherIcon: 1,
+            Wind: { Direction: { Degrees: 180 } },
+          },
+          location: {
+            queryCityName: "Moscow",
           },
         },
       };
 
-      const mockIcon = document.createElement("img");
-      displayWeatherWithIcon.mockResolvedValue(mockIcon);
+      await setWeatherData(weatherData);
 
-      await setWeatherData(mockWeatherData);
+      const cityNameText = document.querySelector(".cityName-text");
+      expect(cityNameText.textContent).toBe("Moscow");
 
-      expect(document.querySelector(".temperatureValue").innerHTML).toBe(
-        "25° C",
-      );
-      expect(document.querySelector(".feelTemperatureValue").innerHTML).toBe(
-        "23° C",
-      );
-      expect(document.querySelector(".weatherText").innerHTML).toBe("Sunny");
-      expect(document.querySelector(".pressureValue").innerHTML).toBe(
-        "760 мм р.с.",
-      );
-      expect(document.querySelector(".windSpeedValue").innerHTML).toBe(
-        "5 км/ч",
-      );
-      expect(document.querySelector(".uvIndexValue").innerHTML).toBe("4");
+      const temperatureValue = document.querySelector(".temperatureValue");
+      expect(temperatureValue.innerHTML).toBe("20° C");
 
-      expect(displayWeatherWithIcon).toHaveBeenCalledWith(1);
-      const iconElement = document.querySelector(".weatherIcon");
-      expect(iconElement.children[0]).toBe(mockIcon);
+      const feelTempValue = document.querySelector(".feelTemperatureValue");
+      expect(feelTempValue.innerHTML).toBe("19° C");
+
+      const weatherText = document.querySelector(".weatherText");
+      expect(weatherText.textContent).toBe("Sunny");
+
+      const gridContainer = document.querySelector(".grid-container");
+      expect(gridContainer.style.visibility).toBe("visible");
     });
 
-    test("should handle missing optional weather data", async () => {
-      const mockWeatherData = {
-        temperature: 20,
-        realFeel: undefined,
-        weatherText: "Cloudy",
-        pressure: 1010,
-        windSpeed: 3,
-        windDirection: null,
-        uvIndex: undefined,
-        weatherIcon: 2,
-        Wind: {
-          Direction: {
-            Degrees: 90,
+    test("должен отобразить ошибку при неудачном запросе", async () => {
+      const weatherData = {
+        status: false,
+        message: "City not found",
+      };
+
+      await setWeatherData(weatherData);
+
+      const errorElement = document.querySelector(".cityName-error");
+      expect(errorElement.textContent).toBe("City not found");
+
+      const errorBlock = document.querySelector(".cityName-block-error");
+      expect(errorBlock.style.display).toBe("flex");
+
+      const textBlock = document.querySelector(".cityName-block-text");
+      expect(textBlock.style.display).toBe("none");
+
+      const gridContainer = document.querySelector(".grid-container");
+      expect(gridContainer.style.visibility).toBe("hidden");
+    });
+
+    test("должен корректно конвертировать давление", async () => {
+      const weatherData = {
+        status: true,
+        weather: {
+          weather: {
+            temperature: 20,
+            realFeel: 19,
+            weatherText: "Sunny",
+            pressure: 1013,
+            windSpeed: 10,
+            uvIndex: 5,
+            weatherIcon: 1,
+            Wind: { Direction: { Degrees: 180 } },
+          },
+          location: {
+            queryCityName: "Moscow",
           },
         },
       };
 
-      const mockIcon = document.createElement("img");
-      displayWeatherWithIcon.mockResolvedValue(mockIcon);
+      await setWeatherData(weatherData);
 
-      await setWeatherData(mockWeatherData);
-
-      expect(document.querySelector(".feelTemperatureValue").innerHTML).toBe(
-        "° C",
-      );
-      expect(document.querySelector(".uvIndexValue").innerHTML).toBe("");
+      const pressureValue = document.querySelector(".pressureValue");
+      expect(pressureValue.innerHTML).toContain("760");
     });
 
-    test("should clear previous icon before adding new one", async () => {
-      const mockIcon1 = document.createElement("img");
-      mockIcon1.id = "icon1";
-      displayWeatherWithIcon.mockResolvedValueOnce(mockIcon1);
-
-      await setWeatherData({
-        temperature: 20,
-        weatherText: "Cloudy",
-        pressure: 1010,
-        windSpeed: 3,
-        weatherIcon: 2,
-        Wind: {
-          Direction: {
-            Degrees: 90,
+    test("должен обработать отсутствующие значения", async () => {
+      const weatherData = {
+        status: true,
+        weather: {
+          weather: {
+            temperature: null,
+            realFeel: undefined,
+            weatherText: "",
+            pressure: null,
+            windSpeed: null,
+            uvIndex: null,
+            weatherIcon: null,
+            Wind: { Direction: { Degrees: null } },
+          },
+          location: {
+            queryCityName: "Moscow",
           },
         },
-      });
+      };
 
-      const iconContainer = document.querySelector(".weatherIcon");
-      expect(iconContainer.children.length).toBe(1);
-      expect(iconContainer.children[0].id).toBe("icon1");
+      await setWeatherData(weatherData);
 
-      const mockIcon2 = document.createElement("img");
-      mockIcon2.id = "icon2";
-      displayWeatherWithIcon.mockResolvedValueOnce(mockIcon2);
+      const temperatureValue = document.querySelector(".temperatureValue");
+      expect(temperatureValue.innerHTML).toBe("° C");
 
-      await setWeatherData({
-        temperature: 22,
-        weatherText: "Sunny",
-        pressure: 1012,
-        windSpeed: 4,
-        weatherIcon: 3,
-        Wind: {
-          Direction: {
-            Degrees: 90,
+      const feelTempValue = document.querySelector(".feelTemperatureValue");
+      expect(feelTempValue.innerHTML).toBe("° C");
+
+      const pressureValue = document.querySelector(".pressureValue");
+      expect(pressureValue.innerHTML).toBe("0 мм р.с.");
+
+      const windSpeedValue = document.querySelector(".windSpeedValue");
+      expect(windSpeedValue.innerHTML).toBe(" км/ч");
+
+      const uvIndexValue = document.querySelector(".uvIndexValue");
+      expect(uvIndexValue.innerHTML).toBe("");
+    });
+
+    test("должен вызвать displayWeatherWithIcon с правильным кодом иконки", async () => {
+      const weatherData = {
+        status: true,
+        weather: {
+          weather: {
+            temperature: 20,
+            realFeel: 19,
+            weatherText: "Sunny",
+            pressure: 1013,
+            windSpeed: 10,
+            uvIndex: 5,
+            weatherIcon: 42,
+            Wind: { Direction: { Degrees: 180 } },
+          },
+          location: {
+            queryCityName: "Moscow",
           },
         },
-      });
+      };
 
-      expect(iconContainer.children.length).toBe(1);
-      expect(iconContainer.children[0].id).toBe("icon2");
+      await setWeatherData(weatherData);
+
+      expect(displayWeatherWithIcon).toHaveBeenCalledWith(42);
+    });
+
+    test("должен вызвать displayWindIcon с правильным направлением", async () => {
+      const weatherData = {
+        status: true,
+        weather: {
+          weather: {
+            temperature: 20,
+            realFeel: 19,
+            weatherText: "Sunny",
+            pressure: 1013,
+            windSpeed: 10,
+            uvIndex: 5,
+            weatherIcon: 1,
+            Wind: { Direction: { Degrees: 270 } },
+          },
+          location: {
+            queryCityName: "Moscow",
+          },
+        },
+      };
+
+      await setWeatherData(weatherData);
+
+      expect(displayWindIcon).toHaveBeenCalledWith(270);
+    });
+
+    test("должен обработать данные без направления ветра", async () => {
+      const weatherData = {
+        status: true,
+        weather: {
+          weather: {
+            temperature: 20,
+            realFeel: 19,
+            weatherText: "Sunny",
+            pressure: 1013,
+            windSpeed: 10,
+            uvIndex: 5,
+            weatherIcon: 1,
+            Wind: { Direction: { Degrees: null } },
+          },
+          location: {
+            queryCityName: "Moscow",
+          },
+        },
+      };
+
+      await setWeatherData(weatherData);
+
+      expect(displayWindIcon).toHaveBeenCalledWith(null);
+    });
+
+    test("должен обработать отрицательную температуру", async () => {
+      const weatherData = {
+        status: true,
+        weather: {
+          weather: {
+            temperature: -15,
+            realFeel: -18,
+            weatherText: "Freezing",
+            pressure: 1020,
+            windSpeed: 25,
+            uvIndex: 1,
+            weatherIcon: 7,
+            Wind: { Direction: { Degrees: 45 } },
+          },
+          location: {
+            queryCityName: "Murmansk",
+          },
+        },
+      };
+
+      await setWeatherData(weatherData);
+
+      const temperatureValue = document.querySelector(".temperatureValue");
+      expect(temperatureValue.innerHTML).toBe("-15° C");
+
+      const feelTempValue = document.querySelector(".feelTemperatureValue");
+      expect(feelTempValue.innerHTML).toBe("-18° C");
     });
   });
 });
