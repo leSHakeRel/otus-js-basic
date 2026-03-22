@@ -59,7 +59,30 @@ body {
     40px 70px;
 }
 
-h1 {
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  color: #fff;
+  /* background: #f4f4f4; */
+}
+
+/* Main centered container */
+.main-container {
+  width: 900px;
+}
+
+.row {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+/* h1 {
   position: absolute;
   left: 50%;
   top: 50%;
@@ -73,7 +96,7 @@ h1 {
   text-align: center;
   font-size: 2em;
   padding: 5px;
-}
+} */
 
 .neon-text {
   font-size: 4rem;

@@ -1,0 +1,44 @@
+.search {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.search input[type="text"],
+.search input[type="submit"] {
+  width: 60%;
+  padding: 10px;
+  font-size: 16px;
+}
+
+.rowFlex {
+  display: flex;
+  flex-direction: row;
+}
+
+.columnFlex {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.centeredFlex {
+  justify-content: center;
+  gap: 40px;
+}
+
+.options {
+  width: 96%;
+}
+
+#locationForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.cityNameInput {
+  display: none;
+}
