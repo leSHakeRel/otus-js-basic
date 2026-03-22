@@ -28,7 +28,7 @@ describe("weatherApi", () => {
   });
 
   describe("getWeatherData", () => {
-    test("должен успешно получить погоду по IP", async () => {
+    test("should successfully get weather by IP", async () => {
       global.fetch.mockImplementationOnce(() =>
         Promise.resolve({
           ok: true,
@@ -81,7 +81,7 @@ describe("weatherApi", () => {
       expect(global.fetch).toHaveBeenCalledTimes(3);
     });
 
-    test("должен успешно получить погоду по названию города", async () => {
+    test("should successfully get weather by city name", async () => {
       global.fetch.mockImplementationOnce(() =>
         Promise.resolve({
           ok: true,
@@ -127,7 +127,7 @@ describe("weatherApi", () => {
       expect(result.weather.weatherText).toBe("Rainy");
     });
 
-    test("должен выбросить ошибку при неверном типе локации", async () => {
+    test("should throw error for invalid location type", async () => {
       await expect(getWeatherData({ type: "invalid" })).rejects.toThrow(
         "undefined location type",
       );
@@ -135,7 +135,7 @@ describe("weatherApi", () => {
       expect(global.fetch).not.toHaveBeenCalled();
     });
 
-    test("должен обработать ошибку API ключа", async () => {
+    test("should handle API key error", async () => {
       global.fetch.mockImplementationOnce(() =>
         Promise.resolve({
           ok: true,
@@ -156,7 +156,7 @@ describe("weatherApi", () => {
       );
     });
 
-    test("должен обработать ошибку при поиске несуществующего города", async () => {
+    test("should handle error when searching for non-existent city", async () => {
       global.fetch.mockImplementationOnce(() =>
         Promise.resolve({
           ok: true,
@@ -169,7 +169,7 @@ describe("weatherApi", () => {
       ).rejects.toThrow("Город <NonExistentCity> не найден");
     });
 
-    test("должен обработать ошибку сети", async () => {
+    test("should handle network error", async () => {
       global.fetch.mockImplementationOnce(() =>
         Promise.reject(new Error("Network error")),
       );
@@ -179,7 +179,7 @@ describe("weatherApi", () => {
       );
     });
 
-    test("должен обработать пустой ответ от API погоды", async () => {
+    test("should handle empty response from weather API", async () => {
       global.fetch.mockImplementationOnce(() =>
         Promise.resolve({
           ok: true,
@@ -215,7 +215,7 @@ describe("weatherApi", () => {
   });
 
   describe("displayWeatherWithIcon", () => {
-    test("должен создать img элемент с правильным src", async () => {
+    test("should create img element with correct src", async () => {
       const imgElement = await displayWeatherWithIcon(5);
 
       expect(imgElement.tagName).toBe("IMG");
@@ -224,7 +224,7 @@ describe("weatherApi", () => {
       expect(imgElement.height).toBe(64);
     });
 
-    test("должен обработать объект с параметрами", async () => {
+    test("should handle object with parameters", async () => {
       const imgElement = await displayWeatherWithIcon({
         weatherIconCode: 10,
         width: 100,
@@ -235,14 +235,14 @@ describe("weatherApi", () => {
       expect(imgElement.height).toBe(100);
     });
 
-    test("должен использовать значения по умолчанию для размера", async () => {
+    test("should use default size values", async () => {
       const imgElement = await displayWeatherWithIcon(15);
 
       expect(imgElement.width).toBe(64);
       expect(imgElement.height).toBe(64);
     });
 
-    test("должен обработать undefined", async () => {
+    test("should handle undefined", async () => {
       const imgElement = await displayWeatherWithIcon(undefined);
 
       expect(imgElement.src).toContain("ds-weather-undefined.svg");
@@ -250,7 +250,7 @@ describe("weatherApi", () => {
   });
 
   describe("displayWindIcon", () => {
-    test("должен создать div с SVG и правильным поворотом", async () => {
+    test("should create div with SVG and correct rotation", async () => {
       const result = await displayWindIcon(45);
 
       expect(result.tagName).toBe("DIV");
@@ -261,21 +261,21 @@ describe("weatherApi", () => {
       expect(svg.getAttribute("height")).toBe("32");
     });
 
-    test("должен корректно обработать нулевое направление ветра", async () => {
+    test("should handle zero wind direction correctly", async () => {
       const result = await displayWindIcon(0);
 
       const svg = result.querySelector("svg");
       expect(svg.style.transform).toBe("rotate(0deg)");
     });
 
-    test("должен корректно обработать направление ветра 360 градусов", async () => {
+    test("should handle 360-degree wind direction correctly", async () => {
       const result = await displayWindIcon(360);
 
       const svg = result.querySelector("svg");
       expect(svg.style.transform).toBe("rotate(360deg)");
     });
 
-    test("должен обработать отрицательное направление ветра", async () => {
+    test("should handle negative wind direction", async () => {
       const result = await displayWindIcon(-90);
 
       const svg = result.querySelector("svg");

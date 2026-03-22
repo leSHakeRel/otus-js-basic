@@ -53,6 +53,6 @@
       "eslint --fix",
       "prettier --write"
     ],
-    "*.{js,css,md,yml,html}": "prettier --write"
+    "*.{js,css,md,yml,html,mjs}": "prettier --write"
   }
 }

@@ -26,7 +26,7 @@ describe("weatherResult", () => {
   });
 
   describe("getWeatherResultUI", () => {
-    test("должен создать UI структуру", () => {
+    test("should create UI structure", () => {
       getWeatherResultUI(container);
 
       const resultSection = container.querySelector(".resultSection");
@@ -40,14 +40,14 @@ describe("weatherResult", () => {
       expect(container.querySelector(".weatherIcon")).toBeTruthy();
     });
 
-    test("должен вывести предупреждение при неверном элементе", () => {
+    test("should log warning for invalid element", () => {
       const consoleSpy = jest.spyOn(console, "warn");
       getWeatherResultUI(null);
       expect(consoleSpy).toHaveBeenCalledWith("element null is not object");
       consoleSpy.mockRestore();
     });
 
-    test("должен вывести предупреждение при undefined элементе", () => {
+    test("should log warning for undefined element", () => {
       const consoleSpy = jest.spyOn(console, "warn");
       getWeatherResultUI(undefined);
       expect(consoleSpy).toHaveBeenCalledWith(
@@ -56,7 +56,7 @@ describe("weatherResult", () => {
       consoleSpy.mockRestore();
     });
 
-    test("должен вывести предупреждение при строковом элементе", () => {
+    test("should log warning for string element", () => {
       const consoleSpy = jest.spyOn(console, "warn");
       getWeatherResultUI("not an object");
       expect(consoleSpy).toHaveBeenCalledWith(
@@ -71,7 +71,7 @@ describe("weatherResult", () => {
       getWeatherResultUI(container);
     });
 
-    test("должен отобразить данные о погоде при успешном запросе", async () => {
+    test("should display weather data on successful request", async () => {
       const weatherData = {
         status: true,
         weather: {
@@ -109,7 +109,7 @@ describe("weatherResult", () => {
       expect(gridContainer.style.visibility).toBe("visible");
     });
 
-    test("должен отобразить ошибку при неудачном запросе", async () => {
+    test("should display error on failed request", async () => {
       const weatherData = {
         status: false,
         message: "City not found",
@@ -130,7 +130,7 @@ describe("weatherResult", () => {
       expect(gridContainer.style.visibility).toBe("hidden");
     });
 
-    test("должен корректно конвертировать давление", async () => {
+    test("should convert pressure correctly", async () => {
       const weatherData = {
         status: true,
         weather: {
@@ -156,7 +156,7 @@ describe("weatherResult", () => {
       expect(pressureValue.innerHTML).toContain("760");
     });
 
-    test("должен обработать отсутствующие значения", async () => {
+    test("should handle missing values", async () => {
       const weatherData = {
         status: true,
         weather: {
@@ -194,7 +194,7 @@ describe("weatherResult", () => {
       expect(uvIndexValue.innerHTML).toBe("");
     });
 
-    test("должен вызвать displayWeatherWithIcon с правильным кодом иконки", async () => {
+    test("should call displayWeatherWithIcon with correct icon code", async () => {
       const weatherData = {
         status: true,
         weather: {
@@ -219,7 +219,7 @@ describe("weatherResult", () => {
       expect(displayWeatherWithIcon).toHaveBeenCalledWith(42);
     });
 
-    test("должен вызвать displayWindIcon с правильным направлением", async () => {
+    test("should call displayWindIcon with correct direction", async () => {
       const weatherData = {
         status: true,
         weather: {
@@ -244,7 +244,7 @@ describe("weatherResult", () => {
       expect(displayWindIcon).toHaveBeenCalledWith(270);
     });
 
-    test("должен обработать данные без направления ветра", async () => {
+    test("should handle data without wind direction", async () => {
       const weatherData = {
         status: true,
         weather: {
@@ -269,7 +269,7 @@ describe("weatherResult", () => {
       expect(displayWindIcon).toHaveBeenCalledWith(null);
     });
 
-    test("должен обработать отрицательную температуру", async () => {
+    test("should handle negative temperature", async () => {
       const weatherData = {
         status: true,
         weather: {

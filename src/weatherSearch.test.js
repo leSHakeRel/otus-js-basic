@@ -14,7 +14,7 @@ describe("weatherSearch", () => {
   });
 
   describe("getWeatherSearchUI", () => {
-    test("должен создать UI структуру", () => {
+    test("should create UI structure", () => {
       getWeatherSearchUI(container);
 
       const section = container.querySelector(".search");
@@ -25,7 +25,7 @@ describe("weatherSearch", () => {
       expect(container.querySelector('input[type="submit"]')).toBeTruthy();
     });
 
-    test("должен создать radio кнопки для выбора типа поиска", () => {
+    test("should create radio buttons for search type selection", () => {
       getWeatherSearchUI(container);
 
       const ipRadio = container.querySelector("#ipSearch");
@@ -37,7 +37,7 @@ describe("weatherSearch", () => {
       expect(cityRadio.getAttribute("value")).toBe("city");
     });
 
-    test("должен создать поле ввода для названия города", () => {
+    test("should create input field for city name", () => {
       getWeatherSearchUI(container);
 
       const cityNameInput = container.querySelector(".cityNameInput");
@@ -48,7 +48,7 @@ describe("weatherSearch", () => {
       expect(cityNameInput.getAttribute("name")).toBe("cityName");
     });
 
-    test("должен скрывать поле ввода города при выборе поиска по IP", () => {
+    test("should hide city input field when IP search is selected", () => {
       getWeatherSearchUI(container);
 
       const cityNameInput = container.querySelector(".cityNameInput");
@@ -70,7 +70,7 @@ describe("weatherSearch", () => {
       expect(cityNameInput.style.display).toBe("none");
     });
 
-    test("должен показывать поле ввода города при выборе поиска по городу", () => {
+    test("should show city input field when city search is selected", () => {
       getWeatherSearchUI(container);
 
       const cityNameInput = container.querySelector(".cityNameInput");
@@ -87,7 +87,7 @@ describe("weatherSearch", () => {
       expect(cityNameInput.style.display).toBe("block");
     });
 
-    test("должен добавлять обработчики событий на radio кнопки", () => {
+    test("should add event listeners to radio buttons", () => {
       const addEventListenerSpy = jest.spyOn(
         HTMLElement.prototype,
         "addEventListener",
@@ -104,7 +104,7 @@ describe("weatherSearch", () => {
       addEventListenerSpy.mockRestore();
     });
 
-    test("должен вывести предупреждение при передаче null", () => {
+    test("should log warning when passing null", () => {
       const consoleSpy = jest.spyOn(console, "warn");
 
       getWeatherSearchUI(null);
@@ -113,7 +113,7 @@ describe("weatherSearch", () => {
       consoleSpy.mockRestore();
     });
 
-    test("должен вывести предупреждение при передаче undefined", () => {
+    test("should log warning when passing undefined", () => {
       const consoleSpy = jest.spyOn(console, "warn");
 
       getWeatherSearchUI(undefined);
@@ -124,7 +124,7 @@ describe("weatherSearch", () => {
       consoleSpy.mockRestore();
     });
 
-    test("должен вывести предупреждение при передаче примитива", () => {
+    test("should log warning when passing primitive", () => {
       const consoleSpy = jest.spyOn(console, "warn");
 
       getWeatherSearchUI("string");
@@ -133,7 +133,7 @@ describe("weatherSearch", () => {
       consoleSpy.mockRestore();
     });
 
-    test("должен вывести предупреждение при передаче числа", () => {
+    test("should log warning when passing number", () => {
       const consoleSpy = jest.spyOn(console, "warn");
 
       getWeatherSearchUI(123);
@@ -142,7 +142,7 @@ describe("weatherSearch", () => {
       consoleSpy.mockRestore();
     });
 
-    test("должен корректно работать с пустым элементом", () => {
+    test("should work correctly with empty element", () => {
       const emptyDiv = document.createElement("div");
 
       getWeatherSearchUI(emptyDiv);
@@ -151,7 +151,7 @@ describe("weatherSearch", () => {
       expect(emptyDiv.querySelector("#locationForm")).toBeTruthy();
     });
 
-    test("должен обрабатывать несколько вызовов на одном элементе", () => {
+    test("should handle multiple calls on the same element", () => {
       getWeatherSearchUI(container);
       getWeatherSearchUI(container);
 
@@ -162,7 +162,7 @@ describe("weatherSearch", () => {
       expect(forms.length).toBe(2);
     });
 
-    test("должен корректно переключать видимость поля ввода при нескольких переключениях", () => {
+    test("should correctly toggle input field visibility with multiple toggles", () => {
       getWeatherSearchUI(container);
 
       const cityNameInput = container.querySelector(".cityNameInput");
@@ -190,7 +190,7 @@ describe("weatherSearch", () => {
       expect(states).toEqual(["none", "block", "none", "block"]);
     });
 
-    test("должен вывести предупреждение при передаче объекта без метода append", () => {
+    test("should log warning when passing object without append method", () => {
       const consoleSpy = jest.spyOn(console, "warn");
       const invalidElement = { notAnElement: true };
 
@@ -200,7 +200,7 @@ describe("weatherSearch", () => {
       consoleSpy.mockRestore();
     });
 
-    test("должен вывести предупреждение при передаче объекта без метода append и не выбросить ошибку", () => {
+    test("should log warning when passing object without append method and not throw error", () => {
       const consoleSpy = jest.spyOn(console, "warn");
       const invalidElement = {};
 
