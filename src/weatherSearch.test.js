@@ -1,140 +1,213 @@
 import { getWeatherSearchUI } from "./weatherSearch";
 
-jest.mock("./weatherSearch.css", () => ({}), { virtual: true });
-
 describe("weatherSearch", () => {
-  let element;
+  let container;
 
   beforeEach(() => {
-    document.body.innerHTML = "";
-    element = document.createElement("div");
+    container = document.createElement("div");
+    document.body.appendChild(container);
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    document.body.removeChild(container);
   });
 
   describe("getWeatherSearchUI", () => {
-    test("should create search UI with form and radio buttons", () => {
-      getWeatherSearchUI(element);
+    test("should create UI structure", () => {
+      getWeatherSearchUI(container);
 
-      const section = element.querySelector(".search");
+      const section = container.querySelector(".search");
       expect(section).toBeTruthy();
+      expect(container.querySelector("h1")).toBeTruthy();
+      expect(container.querySelector("h1").textContent).toBe("Прогноз погоды");
+      expect(container.querySelector("#locationForm")).toBeTruthy();
+      expect(container.querySelector('input[type="submit"]')).toBeTruthy();
+    });
 
-      const form = section.querySelector("#locationForm");
-      expect(form).toBeTruthy();
+    test("should create radio buttons for search type selection", () => {
+      getWeatherSearchUI(container);
 
-      const ipRadio = section.querySelector("#ipSearch");
+      const ipRadio = container.querySelector("#ipSearch");
+      const cityRadio = container.querySelector("#cityNameSearch");
+
       expect(ipRadio).toBeTruthy();
-      expect(ipRadio.value).toBe("auto");
-      expect(ipRadio.checked).toBe(true);
-
-      const cityRadio = section.querySelector("#cityNameSearch");
       expect(cityRadio).toBeTruthy();
-      expect(cityRadio.value).toBe("city");
-
-      const cityInput = section.querySelector(".cityNameInput");
-      expect(cityInput).toBeTruthy();
-      expect(cityInput.placeholder).toBe("Поиск погоды по городу");
-
-      const submitButton = section.querySelector('input[type="submit"]');
-      expect(submitButton).toBeTruthy();
-      expect(submitButton.value).toBe("Поиск");
+      expect(ipRadio.getAttribute("value")).toBe("auto");
+      expect(cityRadio.getAttribute("value")).toBe("city");
     });
 
-    test("should initially hide city input when auto search is selected", () => {
-      getWeatherSearchUI(element);
+    test("should create input field for city name", () => {
+      getWeatherSearchUI(container);
 
-      const cityInput = element.querySelector(".cityNameInput");
-      expect(cityInput.style.display).toBe("");
+      const cityNameInput = container.querySelector(".cityNameInput");
+      expect(cityNameInput).toBeTruthy();
+      expect(cityNameInput.getAttribute("placeholder")).toBe(
+        "Поиск погоды по городу",
+      );
+      expect(cityNameInput.getAttribute("name")).toBe("cityName");
     });
 
-    test("should show city input when city radio is selected", () => {
-      getWeatherSearchUI(element);
+    test("should hide city input field when IP search is selected", () => {
+      getWeatherSearchUI(container);
 
-      const cityRadio = element.querySelector("#cityNameSearch");
-      const cityInput = element.querySelector(".cityNameInput");
+      const cityNameInput = container.querySelector(".cityNameInput");
+      const ipRadio = container.querySelector("#ipSearch");
+      const cityRadio = container.querySelector("#cityNameSearch");
 
-      expect(cityInput.style.display).toBe("");
+      const changeEvent = new Event("change");
+
+      ipRadio.dispatchEvent(changeEvent);
+
+      expect(cityNameInput.style.display).toBe("none");
 
       cityRadio.checked = true;
-      cityRadio.dispatchEvent(new Event("change"));
-
-      expect(cityInput.style.display).toBe("block");
-    });
-
-    test("should hide city input when switching back to IP search", () => {
-      getWeatherSearchUI(element);
-
-      const ipRadio = element.querySelector("#ipSearch");
-      const cityRadio = element.querySelector("#cityNameSearch");
-      const cityInput = element.querySelector(".cityNameInput");
-
-      cityRadio.checked = true;
-      cityRadio.dispatchEvent(new Event("change"));
-      expect(cityInput.style.display).toBe("block");
+      cityRadio.dispatchEvent(changeEvent);
+      expect(cityNameInput.style.display).toBe("block");
 
       ipRadio.checked = true;
-      ipRadio.dispatchEvent(new Event("change"));
-
-      expect(cityInput.style.display).toBe("none");
+      ipRadio.dispatchEvent(changeEvent);
+      expect(cityNameInput.style.display).toBe("none");
     });
 
-    test("should handle change event on all radio buttons", () => {
-      getWeatherSearchUI(element);
+    test("should show city input field when city search is selected", () => {
+      getWeatherSearchUI(container);
 
-      const radios = element.querySelectorAll('input[type="radio"]');
-      const cityInput = element.querySelector(".cityNameInput");
+      const cityNameInput = container.querySelector(".cityNameInput");
+      const ipRadio = container.querySelector("#ipSearch");
+      const cityRadio = container.querySelector("#cityNameSearch");
+      const changeEvent = new Event("change");
 
-      expect(radios.length).toBe(2);
+      ipRadio.dispatchEvent(changeEvent);
+      expect(cityNameInput.style.display).toBe("none");
 
-      radios.forEach((radio) => {
-        const eventSpy = jest.spyOn(radio, "addEventListener");
-        expect(eventSpy).not.toHaveBeenCalled();
-      });
-
-      const cityRadio = element.querySelector("#cityNameSearch");
       cityRadio.checked = true;
-      cityRadio.dispatchEvent(new Event("change"));
-      expect(cityInput.style.display).toBe("block");
+      cityRadio.dispatchEvent(changeEvent);
 
-      const ipRadio = element.querySelector("#ipSearch");
-      ipRadio.checked = true;
-      ipRadio.dispatchEvent(new Event("change"));
-      expect(cityInput.style.display).toBe("none");
+      expect(cityNameInput.style.display).toBe("block");
     });
 
-    test("should log warning when element is not object", () => {
-      const consoleWarnSpy = jest.spyOn(console, "warn").mockImplementation();
-
-      getWeatherSearchUI("not-an-object");
-
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        "element not-an-object is not object",
+    test("should add event listeners to radio buttons", () => {
+      const addEventListenerSpy = jest.spyOn(
+        HTMLElement.prototype,
+        "addEventListener",
       );
 
-      consoleWarnSpy.mockRestore();
+      getWeatherSearchUI(container);
+
+      expect(addEventListenerSpy).toHaveBeenCalledWith(
+        "change",
+        expect.any(Function),
+      );
+      expect(addEventListenerSpy).toHaveBeenCalledTimes(2);
+
+      addEventListenerSpy.mockRestore();
     });
 
-    test("should preserve radio button states after multiple toggles", () => {
-      getWeatherSearchUI(element);
+    test("should log warning when passing null", () => {
+      const consoleSpy = jest.spyOn(console, "warn");
 
-      const ipRadio = element.querySelector("#ipSearch");
-      const cityRadio = element.querySelector("#cityNameSearch");
-      const cityInput = element.querySelector(".cityNameInput");
+      getWeatherSearchUI(null);
 
-      expect(ipRadio.checked).toBe(true);
-      expect(cityRadio.checked).toBe(false);
+      expect(consoleSpy).toHaveBeenCalledWith("element null is not object");
+      consoleSpy.mockRestore();
+    });
+
+    test("should log warning when passing undefined", () => {
+      const consoleSpy = jest.spyOn(console, "warn");
+
+      getWeatherSearchUI(undefined);
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "element undefined is not object",
+      );
+      consoleSpy.mockRestore();
+    });
+
+    test("should log warning when passing primitive", () => {
+      const consoleSpy = jest.spyOn(console, "warn");
+
+      getWeatherSearchUI("string");
+
+      expect(consoleSpy).toHaveBeenCalledWith("element string is not object");
+      consoleSpy.mockRestore();
+    });
+
+    test("should log warning when passing number", () => {
+      const consoleSpy = jest.spyOn(console, "warn");
+
+      getWeatherSearchUI(123);
+
+      expect(consoleSpy).toHaveBeenCalledWith("element 123 is not object");
+      consoleSpy.mockRestore();
+    });
+
+    test("should work correctly with empty element", () => {
+      const emptyDiv = document.createElement("div");
+
+      getWeatherSearchUI(emptyDiv);
+
+      expect(emptyDiv.querySelector(".search")).toBeTruthy();
+      expect(emptyDiv.querySelector("#locationForm")).toBeTruthy();
+    });
+
+    test("should handle multiple calls on the same element", () => {
+      getWeatherSearchUI(container);
+      getWeatherSearchUI(container);
+
+      const sections = container.querySelectorAll(".search");
+      expect(sections.length).toBe(2);
+
+      const forms = container.querySelectorAll("#locationForm");
+      expect(forms.length).toBe(2);
+    });
+
+    test("should correctly toggle input field visibility with multiple toggles", () => {
+      getWeatherSearchUI(container);
+
+      const cityNameInput = container.querySelector(".cityNameInput");
+      const ipRadio = container.querySelector("#ipSearch");
+      const cityRadio = container.querySelector("#cityNameSearch");
+      const changeEvent = new Event("change");
+
+      const states = [];
+
+      ipRadio.dispatchEvent(changeEvent);
+      states.push(cityNameInput.style.display);
 
       cityRadio.checked = true;
-      cityRadio.dispatchEvent(new Event("change"));
-
-      expect(ipRadio.checked).toBe(false);
-      expect(cityRadio.checked).toBe(true);
-      expect(cityInput.style.display).toBe("block");
+      cityRadio.dispatchEvent(changeEvent);
+      states.push(cityNameInput.style.display);
 
       ipRadio.checked = true;
-      ipRadio.dispatchEvent(new Event("change"));
+      ipRadio.dispatchEvent(changeEvent);
+      states.push(cityNameInput.style.display);
 
-      expect(ipRadio.checked).toBe(true);
-      expect(cityRadio.checked).toBe(false);
-      expect(cityInput.style.display).toBe("none");
+      cityRadio.checked = true;
+      cityRadio.dispatchEvent(changeEvent);
+      states.push(cityNameInput.style.display);
+
+      expect(states).toEqual(["none", "block", "none", "block"]);
+    });
+
+    test("should log warning when passing object without append method", () => {
+      const consoleSpy = jest.spyOn(console, "warn");
+      const invalidElement = { notAnElement: true };
+
+      getWeatherSearchUI(invalidElement);
+
+      expect(consoleSpy).toHaveBeenCalled();
+      consoleSpy.mockRestore();
+    });
+
+    test("should log warning when passing object without append method and not throw error", () => {
+      const consoleSpy = jest.spyOn(console, "warn");
+      const invalidElement = {};
+
+      expect(() => getWeatherSearchUI(invalidElement)).not.toThrow();
+
+      expect(consoleSpy).toHaveBeenCalled();
+      consoleSpy.mockRestore();
     });
   });
 });

@@ -114,8 +114,23 @@ describe("runApp", () => {
       };
       global.FormData = jest.fn().mockReturnValue(mockFormData);
 
-      const mockWeatherData = { temperature: 20, condition: "sunny" };
-      getWeatherData.mockResolvedValue(mockWeatherData);
+      const mockWeatherResponse = {
+        weather: {
+          temperature: 20,
+          condition: "sunny",
+        },
+        location: {
+          queryCityName: "London",
+          country: "UK",
+          localizedName: "London",
+          geo: {
+            lat: 51.5,
+            lng: -0.1,
+          },
+        },
+      };
+
+      getWeatherData.mockResolvedValue(mockWeatherResponse);
 
       await submitHandler(mockEvent);
 
@@ -127,7 +142,43 @@ describe("runApp", () => {
         type: "city",
         cityName: "London",
       });
-      expect(setWeatherData).toHaveBeenCalledWith(mockWeatherData);
+
+      expect(setWeatherData).toHaveBeenCalledWith({
+        status: true,
+        message: "",
+        weather: mockWeatherResponse,
+      });
+    });
+
+    test("should handle form submit with error", async () => {
+      const mockEvent = {
+        preventDefault: jest.fn(),
+      };
+
+      const mockFormData = {
+        get: jest
+          .fn()
+          .mockReturnValueOnce("city")
+          .mockReturnValueOnce("InvalidCity"),
+      };
+      global.FormData = jest.fn().mockReturnValue(mockFormData);
+
+      const mockError = new Error("City not found");
+      getWeatherData.mockRejectedValue(mockError);
+
+      await submitHandler(mockEvent);
+
+      expect(mockEvent.preventDefault).toHaveBeenCalled();
+      expect(getWeatherData).toHaveBeenCalledWith({
+        type: "city",
+        cityName: "InvalidCity",
+      });
+
+      expect(setWeatherData).toHaveBeenCalledWith({
+        status: false,
+        message: mockError.message,
+        weather: undefined,
+      });
     });
   });
 
@@ -138,5 +189,56 @@ describe("runApp", () => {
 
     expect(mockElement.querySelector).toHaveBeenCalledWith("#locationForm");
     expect(mockForm.addEventListener).not.toHaveBeenCalled();
+  });
+
+  test("should load saved data from localStorage", async () => {
+    const mockSavedData = {
+      type: "city",
+      cityName: "Paris",
+    };
+
+    const getItemSpy = jest.spyOn(Storage.prototype, "getItem");
+    getItemSpy.mockReturnValue(JSON.stringify(mockSavedData));
+
+    const mockCityRadio = document.createElement("input");
+    mockCityRadio.checked = false;
+    const mockCityNameInput = document.createElement("input");
+    mockCityNameInput.style = {};
+
+    mockElement.querySelector = jest.fn().mockImplementation((selector) => {
+      if (selector === "#locationForm") return mockForm;
+      if (selector === "#cityNameSearch") return mockCityRadio;
+      if (selector === ".cityNameInput") return mockCityNameInput;
+      return null;
+    });
+
+    const mockWeatherResponse = {
+      weather: {
+        temperature: 25,
+        condition: "sunny",
+      },
+      location: {
+        queryCityName: "Paris",
+      },
+    };
+    getWeatherData.mockResolvedValue(mockWeatherResponse);
+
+    runApp(mockElement);
+
+    expect(getItemSpy).toHaveBeenCalledWith("searchData");
+    expect(mockCityRadio.checked).toBe(true);
+    expect(mockCityNameInput.value).toBe("Paris");
+    expect(mockCityNameInput.style.display).toBe("block");
+    expect(getWeatherData).toHaveBeenCalledWith(mockSavedData);
+
+    await new Promise(process.nextTick);
+
+    expect(setWeatherData).toHaveBeenCalledWith({
+      status: true,
+      message: "",
+      weather: mockWeatherResponse,
+    });
+
+    getItemSpy.mockRestore();
   });
 });

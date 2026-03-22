@@ -5,11 +5,14 @@ import "./weatherSearch.css";
  * @param {HTMLElement} element - модифицируемый элемент
  */
 export function getWeatherSearchUI(element) {
-  if (typeof element === "object" && element !== null) {
-    const sectionElement = document.createElement("section");
-    sectionElement.classList.add("search");
-    sectionElement.innerHTML = `
-    <h1>Поиск погоды</h1>
+  if (typeof element !== "object" || element === null) {
+    console.warn(`element ${element} is not object`);
+    return;
+  }
+  const sectionElement = document.createElement("section");
+  sectionElement.classList.add("search");
+  sectionElement.innerHTML = `
+    <h1>Прогноз погоды</h1>
     <form id='locationForm'>
         <div class='columnFlex options'>
             <div class='rowFlex centeredFlex'>
@@ -27,21 +30,23 @@ export function getWeatherSearchUI(element) {
         <input type='submit' value='Поиск'/>
     </form>
     `;
-    element.append(sectionElement);
-
-    const cityNameInput = sectionElement.querySelector(".cityNameInput");
-    const radios = sectionElement.querySelectorAll(`input[type='radio']`);
-
-    const toggleInput = () => {
-      cityNameInput.style.display = sectionElement.querySelector(
-        "#cityNameSearch",
-      ).checked
-        ? "block"
-        : "none";
-    };
-
-    radios.forEach((radio) => radio.addEventListener("change", toggleInput));
-  } else {
-    console.warn(`element ${element} is not object`);
+  if (element.append === undefined) {
+    console.warn(`element ${element} has no append method`);
+    return;
   }
+
+  element.append(sectionElement);
+
+  const cityNameInput = sectionElement.querySelector(".cityNameInput");
+  const radios = sectionElement.querySelectorAll(`input[type='radio']`);
+
+  const toggleInput = () => {
+    cityNameInput.style.display = sectionElement.querySelector(
+      "#cityNameSearch",
+    ).checked
+      ? "block"
+      : "none";
+  };
+
+  radios.forEach((radio) => radio.addEventListener("change", toggleInput));
 }

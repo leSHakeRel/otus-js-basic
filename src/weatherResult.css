@@ -38,3 +38,29 @@
   margin-top: 5px;
   margin-bottom: 5px;
 }
+
+.resultSection-cityName {
+  display: flex;
+  flex-direction: column;
+}
+
+.cityName-block-text,
+.cityName-block-error {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.cityName-block-text {
+  background: #72ffa8;
+  border: 1px solid #5afd98;
+  border-radius: 5px;
+  color: #424242;
+}
+
+.cityName-block-error {
+  background: #ff7d55;
+  border: 1px solid #fd7248;
+  border-radius: 5px;
+  color: #424242;
+}
