@@ -63,7 +63,7 @@ async function getLocationByIP() {
     }
 
     const data = await response.json();
-    console.log(data);
+    // console.log(data);
 
     return {
       key: data.Key,
@@ -102,7 +102,7 @@ async function getLocationByCity(cityName) {
     const data = await response.json();
 
     if (data.length === 0) {
-      throw new Error("Город не найден");
+      throw new Error(`Город <${cityName}> не найден`);
     }
 
     return {
@@ -112,7 +112,7 @@ async function getLocationByCity(cityName) {
       ...data[0],
     };
   } catch (error) {
-    console.error("Ошибка поиска города:", error);
+    console.error(`Ошибка поиска города ${cityName}:`, error);
     throw error;
   }
 }
@@ -217,18 +217,36 @@ export async function displayWindIcon(windDirection) {
  */
 export async function getWeatherData(location) {
   let weatherData;
+  let locationData;
   try {
     let locationKey;
     switch (location.type) {
       case "auto": {
         const ipLocation = await getLocationByIP();
         locationKey = ipLocation.key;
+        locationData = {
+          queryCityName: ipLocation.LocalizedName,
+          country: ipLocation.Country.LocalizedName,
+          localizedName: ipLocation.LocalizedName,
+          geo: {
+            lat: ipLocation.geoPosition.Latitude,
+            lng: ipLocation.geoPosition.Longitude,
+          },
+        };
         break;
       }
       case "city": {
         const locationCity = await getLocationByCity(location.cityName);
         locationKey = locationCity.key;
-        0;
+        locationData = {
+          queryCityName: location.cityName,
+          country: locationCity.Country.LocalizedName,
+          localizedName: locationCity.LocalizedName,
+          geo: {
+            lat: locationCity.GeoPosition.Latitude,
+            lng: locationCity.GeoPosition.Longitude,
+          },
+        };
         break;
       }
       default: {
@@ -240,9 +258,15 @@ export async function getWeatherData(location) {
 
     weatherData = await getCurrentWeather(locationKey);
   } catch (error) {
-    console.error("Ошибка получении погоды:", error);
+    console.error(
+      `Ошибка получении погоды${location.type === "city" ? ` города <${location.city}>"` : ""}:`,
+      error,
+    );
     throw error;
   }
   // console.log(weatherData);
-  return weatherData;
+  return {
+    weather: weatherData,
+    location: locationData,
+  };
 }
