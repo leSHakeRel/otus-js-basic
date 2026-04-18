@@ -1,4 +1,6 @@
 export default {
-  API_KEY: "zpka_a24d9bc6eb3c4a44b10593f7f276a603_f50977a0",
-  BASE_URL: "https://dataservice.accuweather.com",
+  OPEN_METEO_BASE_URL: "https://geocoding-api.open-meteo.com/v1",
+  OPEN_METEO_WEATHER_URL: "https://api.open-meteo.com/v1",
+  IPIFY_BASE_URL: "https://api.ipify.org",
+  IPAPI_BASE_URL: "http://ip-api.com",
 };
