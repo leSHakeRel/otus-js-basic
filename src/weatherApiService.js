@@ -19,7 +19,7 @@ export async function getPublicIP() {
  */
 export async function getLocationByIP() {
   const ip = await getPublicIP();
-  const response = await fetch(`${apiConfig.IPAPI_BASE_URL}/json/${ip}`);
+  const response = await fetch(`${apiConfig.IPAPI_BASE_URL}/${ip}`);
 
   if (!response.ok) {
     throw new Error(`HTTP ошибка! Статус: ${response.status}`);
