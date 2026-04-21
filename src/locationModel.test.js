@@ -37,12 +37,12 @@ describe("locationModel", () => {
 
       const result = locationModel.createLocationFromGeoData(geoData);
 
-      expect(result.key).toBe("40.7128,-74.006");
-      expect(result.name).toBe("New York");
-      expect(result.country).toBe("USA");
-      expect(result.geo.lat).toBe(40.7128);
-      expect(result.geo.lng).toBe(-74.006);
-      expect(result.timeZone).toBe("America/New_York");
+      expect(result.key).toEqual("40.7128,-74.006");
+      expect(result.name).toEqual("New York");
+      expect(result.country).toEqual("USA");
+      expect(result.geo.lat).toEqual(40.7128);
+      expect(result.geo.lng).toEqual(-74.006);
+      expect(result.timeZone).toEqual("America/New_York");
     });
 
     it("should handle negative longitude values", () => {
@@ -56,9 +56,9 @@ describe("locationModel", () => {
 
       const result = locationModel.createLocationFromGeoData(geoData);
 
-      expect(result.key).toBe("-33.8688,-151.2093");
-      expect(result.geo.lat).toBe(-33.8688);
-      expect(result.geo.lng).toBe(-151.2093);
+      expect(result.key).toEqual("-33.8688,-151.2093");
+      expect(result.geo.lat).toEqual(-33.8688);
+      expect(result.geo.lng).toEqual(-151.2093);
     });
 
     it("should handle positive longitude values", () => {
@@ -72,9 +72,9 @@ describe("locationModel", () => {
 
       const result = locationModel.createLocationFromGeoData(geoData);
 
-      expect(result.key).toBe("35.6895,139.6917");
-      expect(result.geo.lat).toBe(35.6895);
-      expect(result.geo.lng).toBe(139.6917);
+      expect(result.key).toEqual("35.6895,139.6917");
+      expect(result.geo.lat).toEqual(35.6895);
+      expect(result.geo.lng).toEqual(139.6917);
     });
 
     it("should handle decimal coordinates correctly", () => {
@@ -88,9 +88,9 @@ describe("locationModel", () => {
 
       const result = locationModel.createLocationFromGeoData(geoData);
 
-      expect(result.key).toBe("48.8566,2.3522");
-      expect(result.geo.lat).toBe(48.8566);
-      expect(result.geo.lng).toBe(2.3522);
+      expect(result.key).toEqual("48.8566,2.3522");
+      expect(result.geo.lat).toEqual(48.8566);
+      expect(result.geo.lng).toEqual(2.3522);
     });
 
     it("should handle missing timezone", () => {
@@ -105,7 +105,7 @@ describe("locationModel", () => {
       const result = locationModel.createLocationFromGeoData(geoData);
 
       expect(result.timeZone).toBeUndefined();
-      expect(result.name).toBe("Moscow");
+      expect(result.name).toEqual("Moscow");
     });
 
     it("should preserve localizedName same as name", () => {
@@ -119,8 +119,8 @@ describe("locationModel", () => {
 
       const result = locationModel.createLocationFromGeoData(geoData);
 
-      expect(result.localizedName).toBe(result.name);
-      expect(result.localizedName).toBe("Berlin");
+      expect(result.localizedName).toEqual(result.name);
+      expect(result.localizedName).toEqual("Berlin");
     });
   });
 
@@ -160,12 +160,12 @@ describe("locationModel", () => {
 
       const result = locationModel.createLocationFromIPData(ipData);
 
-      expect(result.key).toBe("51.5074,-0.1278");
-      expect(result.name).toBe("London");
-      expect(result.country).toBe("United Kingdom");
-      expect(result.geo.lat).toBe(51.5074);
-      expect(result.geo.lng).toBe(-0.1278);
-      expect(result.timeZone).toBe("Europe/London");
+      expect(result.key).toEqual("51.5074,-0.1278");
+      expect(result.name).toEqual("London");
+      expect(result.country).toEqual("United Kingdom");
+      expect(result.geo.lat).toEqual(51.5074);
+      expect(result.geo.lng).toEqual(-0.1278);
+      expect(result.timeZone).toEqual("Europe/London");
     });
 
     it("should handle Asian city IP data", () => {
@@ -179,11 +179,11 @@ describe("locationModel", () => {
 
       const result = locationModel.createLocationFromIPData(ipData);
 
-      expect(result.key).toBe("35.6895,139.6917");
-      expect(result.name).toBe("Tokyo");
-      expect(result.country).toBe("Japan");
-      expect(result.geo.lat).toBe(35.6895);
-      expect(result.geo.lng).toBe(139.6917);
+      expect(result.key).toEqual("35.6895,139.6917");
+      expect(result.name).toEqual("Tokyo");
+      expect(result.country).toEqual("Japan");
+      expect(result.geo.lat).toEqual(35.6895);
+      expect(result.geo.lng).toEqual(139.6917);
     });
 
     it("should handle southern hemisphere IP data", () => {
@@ -197,9 +197,9 @@ describe("locationModel", () => {
 
       const result = locationModel.createLocationFromIPData(ipData);
 
-      expect(result.key).toBe("-33.8688,151.2093");
-      expect(result.geo.lat).toBe(-33.8688);
-      expect(result.geo.lng).toBe(151.2093);
+      expect(result.key).toEqual("-33.8688,151.2093");
+      expect(result.geo.lat).toEqual(-33.8688);
+      expect(result.geo.lng).toEqual(151.2093);
     });
 
     it("should handle decimal precision in IP coordinates", () => {
@@ -213,9 +213,9 @@ describe("locationModel", () => {
 
       const result = locationModel.createLocationFromIPData(ipData);
 
-      expect(result.key).toBe("40.7128,-74.006");
-      expect(result.geo.lat).toBe(40.7128);
-      expect(result.geo.lng).toBe(-74.006);
+      expect(result.key).toEqual("40.7128,-74.006");
+      expect(result.geo.lat).toEqual(40.7128);
+      expect(result.geo.lng).toEqual(-74.006);
     });
 
     it("should handle missing timezone in IP data", () => {
@@ -230,7 +230,7 @@ describe("locationModel", () => {
       const result = locationModel.createLocationFromIPData(ipData);
 
       expect(result.timeZone).toBeUndefined();
-      expect(result.name).toBe("Moscow");
+      expect(result.name).toEqual("Moscow");
     });
 
     it("should preserve localizedName same as city name", () => {
@@ -244,8 +244,8 @@ describe("locationModel", () => {
 
       const result = locationModel.createLocationFromIPData(ipData);
 
-      expect(result.localizedName).toBe(result.name);
-      expect(result.localizedName).toBe("Paris");
+      expect(result.localizedName).toEqual(result.name);
+      expect(result.localizedName).toEqual("Paris");
     });
 
     it("should handle city names with spaces", () => {
@@ -259,8 +259,8 @@ describe("locationModel", () => {
 
       const result = locationModel.createLocationFromIPData(ipData);
 
-      expect(result.name).toBe("Los Angeles");
-      expect(result.localizedName).toBe("Los Angeles");
+      expect(result.name).toEqual("Los Angeles");
+      expect(result.localizedName).toEqual("Los Angeles");
     });
 
     it("should handle city names with special characters", () => {
@@ -274,8 +274,8 @@ describe("locationModel", () => {
 
       const result = locationModel.createLocationFromIPData(ipData);
 
-      expect(result.name).toBe("Strasbourg");
-      expect(result.country).toBe("France");
+      expect(result.name).toEqual("Strasbourg");
+      expect(result.country).toEqual("France");
     });
   });
 
@@ -300,12 +300,12 @@ describe("locationModel", () => {
       const geoResult = locationModel.createLocationFromGeoData(geoData);
       const ipResult = locationModel.createLocationFromIPData(ipData);
 
-      expect(geoResult.key).toBe(ipResult.key);
-      expect(geoResult.name).toBe(ipResult.name);
-      expect(geoResult.country).toBe(ipResult.country);
-      expect(geoResult.geo.lat).toBe(ipResult.geo.lat);
-      expect(geoResult.geo.lng).toBe(ipResult.geo.lng);
-      expect(geoResult.timeZone).toBe(ipResult.timeZone);
+      expect(geoResult.key).toEqual(ipResult.key);
+      expect(geoResult.name).toEqual(ipResult.name);
+      expect(geoResult.country).toEqual(ipResult.country);
+      expect(geoResult.geo.lat).toEqual(ipResult.geo.lat);
+      expect(geoResult.geo.lng).toEqual(ipResult.geo.lng);
+      expect(geoResult.timeZone).toEqual(ipResult.timeZone);
     });
 
     it("should handle zero coordinates correctly", () => {
@@ -328,10 +328,10 @@ describe("locationModel", () => {
       const geoResult = locationModel.createLocationFromGeoData(geoData);
       const ipResult = locationModel.createLocationFromIPData(ipData);
 
-      expect(geoResult.key).toBe("0,0");
-      expect(ipResult.key).toBe("0,0");
-      expect(geoResult.geo.lat).toBe(0);
-      expect(ipResult.geo.lng).toBe(0);
+      expect(geoResult.key).toEqual("0,0");
+      expect(ipResult.key).toEqual("0,0");
+      expect(geoResult.geo.lat).toEqual(0);
+      expect(ipResult.geo.lng).toEqual(0);
     });
   });
 });
