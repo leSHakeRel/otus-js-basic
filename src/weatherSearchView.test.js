@@ -1,19 +1,25 @@
 import * as weatherSearchView from "./weatherSearchView";
+import { bus } from "./eventbus.js";
+
+jest.mock("./eventbus.js", () => ({
+  bus: {
+    emit: jest.fn(),
+  },
+}));
 
 describe("weatherSearchView", () => {
   let container;
-  let mockOnSubmit;
 
   beforeEach(() => {
     document.body.innerHTML = "";
     container = document.createElement("div");
     document.body.appendChild(container);
-    mockOnSubmit = jest.fn();
+    bus.emit.mockClear();
   });
 
   describe("renderWeatherSearch", () => {
     it("should render search form with title", () => {
-      weatherSearchView.renderWeatherSearch(container, mockOnSubmit);
+      weatherSearchView.renderWeatherSearch(container);
 
       const heading = container.querySelector("h1");
       expect(heading).toBeTruthy();
@@ -21,7 +27,7 @@ describe("weatherSearchView", () => {
     });
 
     it("should render form with location selector", () => {
-      weatherSearchView.renderWeatherSearch(container, mockOnSubmit);
+      weatherSearchView.renderWeatherSearch(container);
 
       const form = container.querySelector("#locationForm");
       expect(form).toBeTruthy();
@@ -34,7 +40,7 @@ describe("weatherSearchView", () => {
     });
 
     it("should have IP search checked by default", () => {
-      weatherSearchView.renderWeatherSearch(container, mockOnSubmit);
+      weatherSearchView.renderWeatherSearch(container);
 
       const ipRadio = container.querySelector("#ipSearch");
       expect(ipRadio.checked).toBe(true);
@@ -44,7 +50,7 @@ describe("weatherSearchView", () => {
     });
 
     it("should render city name input field", () => {
-      weatherSearchView.renderWeatherSearch(container, mockOnSubmit);
+      weatherSearchView.renderWeatherSearch(container);
 
       const cityInput = container.querySelector(".cityNameInput");
       expect(cityInput).toBeTruthy();
@@ -52,7 +58,7 @@ describe("weatherSearchView", () => {
     });
 
     it("should render submit button", () => {
-      weatherSearchView.renderWeatherSearch(container, mockOnSubmit);
+      weatherSearchView.renderWeatherSearch(container);
 
       const submitButton = container.querySelector("input[type='submit']");
       expect(submitButton).toBeTruthy();
@@ -60,7 +66,7 @@ describe("weatherSearchView", () => {
     });
 
     it("should hide city input initially when IP search is default", () => {
-      weatherSearchView.renderWeatherSearch(container, mockOnSubmit);
+      weatherSearchView.renderWeatherSearch(container);
 
       const cityInput = container.querySelector(".cityNameInput");
       expect(cityInput.style.display).toBe("none");
@@ -68,8 +74,8 @@ describe("weatherSearchView", () => {
   });
 
   describe("form submission", () => {
-    it("should call onSubmit with search data when form is submitted with IP search", () => {
-      weatherSearchView.renderWeatherSearch(container, mockOnSubmit);
+    it("should emit search:submit event with search data when form is submitted with IP search", () => {
+      weatherSearchView.renderWeatherSearch(container);
 
       const form = container.querySelector("#locationForm");
       const ipRadio = container.querySelector("#ipSearch");
@@ -78,14 +84,14 @@ describe("weatherSearchView", () => {
       const submitEvent = new Event("submit", { bubbles: true });
       form.dispatchEvent(submitEvent);
 
-      expect(mockOnSubmit).toHaveBeenCalledWith({
+      expect(bus.emit).toHaveBeenCalledWith("search:submit", {
         type: "auto",
         cityName: "",
       });
     });
 
-    it("should call onSubmit with city name when city search is selected", () => {
-      weatherSearchView.renderWeatherSearch(container, mockOnSubmit);
+    it("should emit search:submit event with city name when city search is selected", () => {
+      weatherSearchView.renderWeatherSearch(container);
 
       const cityRadio = container.querySelector("#cityNameSearch");
       cityRadio.checked = true;
@@ -97,14 +103,14 @@ describe("weatherSearchView", () => {
       const submitEvent = new Event("submit", { bubbles: true });
       form.dispatchEvent(submitEvent);
 
-      expect(mockOnSubmit).toHaveBeenCalledWith({
+      expect(bus.emit).toHaveBeenCalledWith("search:submit", {
         type: "city",
         cityName: "Moscow",
       });
     });
 
     it("should prevent default form submission", () => {
-      weatherSearchView.renderWeatherSearch(container, mockOnSubmit);
+      weatherSearchView.renderWeatherSearch(container);
 
       const form = container.querySelector("#locationForm");
       const preventDefaultSpy = jest.fn();
@@ -119,7 +125,7 @@ describe("weatherSearchView", () => {
 
   describe("city input visibility toggle", () => {
     it("should show city input when city radio is selected", () => {
-      weatherSearchView.renderWeatherSearch(container, mockOnSubmit);
+      weatherSearchView.renderWeatherSearch(container);
 
       const cityRadio = container.querySelector("#cityNameSearch");
       const cityInput = container.querySelector(".cityNameInput");
@@ -130,7 +136,7 @@ describe("weatherSearchView", () => {
     });
 
     it("should hide city input when IP radio is selected", () => {
-      weatherSearchView.renderWeatherSearch(container, mockOnSubmit);
+      weatherSearchView.renderWeatherSearch(container);
 
       const ipRadio = container.querySelector("#ipSearch");
       const cityInput = container.querySelector(".cityNameInput");
@@ -144,7 +150,7 @@ describe("weatherSearchView", () => {
 
   describe("setCityName", () => {
     it("should set city input value", () => {
-      weatherSearchView.renderWeatherSearch(container, mockOnSubmit);
+      weatherSearchView.renderWeatherSearch(container);
 
       weatherSearchView.setCityName("Paris");
 
@@ -153,15 +159,13 @@ describe("weatherSearchView", () => {
     });
 
     it("should do nothing if city input doesn't exist", () => {
-      weatherSearchView.setCityName("Paris");
-
       expect(() => weatherSearchView.setCityName("Paris")).not.toThrow();
     });
   });
 
   describe("setSearchType", () => {
     it("should set search type to auto", () => {
-      weatherSearchView.renderWeatherSearch(container, mockOnSubmit);
+      weatherSearchView.renderWeatherSearch(container);
 
       weatherSearchView.setSearchType("auto");
 
@@ -173,7 +177,7 @@ describe("weatherSearchView", () => {
     });
 
     it("should set search type to city", () => {
-      weatherSearchView.renderWeatherSearch(container, mockOnSubmit);
+      weatherSearchView.renderWeatherSearch(container);
 
       weatherSearchView.setSearchType("city");
 
@@ -185,7 +189,7 @@ describe("weatherSearchView", () => {
     });
 
     it("should toggle city input visibility when setting search type to city", () => {
-      weatherSearchView.renderWeatherSearch(container, mockOnSubmit);
+      weatherSearchView.renderWeatherSearch(container);
 
       weatherSearchView.setSearchType("city");
 
@@ -194,7 +198,7 @@ describe("weatherSearchView", () => {
     });
 
     it("should toggle city input visibility when setting search type to auto", () => {
-      weatherSearchView.renderWeatherSearch(container, mockOnSubmit);
+      weatherSearchView.renderWeatherSearch(container);
 
       weatherSearchView.setSearchType("city");
       weatherSearchView.setSearchType("auto");
@@ -204,15 +208,13 @@ describe("weatherSearchView", () => {
     });
 
     it("should do nothing if radio buttons don't exist", () => {
-      weatherSearchView.setSearchType("auto");
-
       expect(() => weatherSearchView.setSearchType("auto")).not.toThrow();
     });
   });
 
   describe("multiple form submissions", () => {
-    it("should call onSubmit each time form is submitted", () => {
-      weatherSearchView.renderWeatherSearch(container, mockOnSubmit);
+    it("should emit event each time form is submitted", () => {
+      weatherSearchView.renderWeatherSearch(container);
 
       const form = container.querySelector("#locationForm");
       const submitEvent = new Event("submit", { bubbles: true });
@@ -221,23 +223,7 @@ describe("weatherSearchView", () => {
       form.dispatchEvent(submitEvent);
       form.dispatchEvent(submitEvent);
 
-      expect(mockOnSubmit).toHaveBeenCalledTimes(3);
-    });
-  });
-
-  describe("radio button event listeners", () => {
-    it("should attach change event listeners to both radio buttons", () => {
-      const addEventListenerSpy = jest.spyOn(
-        HTMLElement.prototype,
-        "addEventListener",
-      );
-
-      weatherSearchView.renderWeatherSearch(container, mockOnSubmit);
-
-      expect(addEventListenerSpy).toHaveBeenCalledWith(
-        "change",
-        expect.any(Function),
-      );
+      expect(bus.emit).toHaveBeenCalledTimes(3);
     });
   });
 });

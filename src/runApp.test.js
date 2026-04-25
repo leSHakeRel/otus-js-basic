@@ -3,11 +3,19 @@ import * as weatherSearchView from "./weatherSearchView";
 import * as weatherResultView from "./weatherResultView";
 import * as weatherController from "./weatherController";
 import { addElement } from "./view.js";
+import { bus } from "./eventbus.js";
 
 jest.mock("./weatherSearchView");
 jest.mock("./weatherResultView");
 jest.mock("./weatherController");
 jest.mock("./view.js");
+jest.mock("./eventbus.js", () => ({
+  bus: {
+    on: jest.fn(),
+    emit: jest.fn(),
+    off: jest.fn(),
+  },
+}));
 
 describe("runApp", () => {
   let mockElement;
@@ -15,11 +23,10 @@ describe("runApp", () => {
   beforeEach(() => {
     mockElement = document.createElement("div");
     addElement.mockReturnValue(document.createElement("div"));
-    weatherSearchView.renderWeatherSearch.mockImplementation(
-      (container, callback) => {},
-    );
+    weatherSearchView.renderWeatherSearch.mockImplementation(() => {});
     weatherResultView.renderWeatherResult.mockImplementation(() => {});
     weatherController.initController.mockImplementation(() => {});
+    bus.on.mockClear();
   });
 
   afterEach(() => {
@@ -68,13 +75,19 @@ describe("runApp", () => {
     expect(weatherController.initController).toHaveBeenCalled();
   });
 
-  it("should pass callback to renderWeatherSearch that calls fetchWeather", () => {
+  it("should subscribe to search:submit event", () => {
+    runApp(mockElement);
+
+    expect(bus.on).toHaveBeenCalledWith("search:submit", expect.any(Function));
+  });
+
+  it("should call fetchWeather when search:submit event is emitted", () => {
     let capturedCallback;
-    weatherSearchView.renderWeatherSearch.mockImplementation(
-      (container, callback) => {
+    bus.on.mockImplementation((event, callback) => {
+      if (event === "search:submit") {
         capturedCallback = callback;
-      },
-    );
+      }
+    });
 
     runApp(mockElement);
 
