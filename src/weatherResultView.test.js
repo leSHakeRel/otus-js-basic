@@ -1,7 +1,14 @@
 import * as weatherResultView from "./weatherResultView";
 import { addElement } from "./view.js";
+import { bus } from "./eventbus.js";
 
 jest.mock("./view.js");
+jest.mock("./eventbus.js", () => ({
+  bus: {
+    on: jest.fn(() => jest.fn()),
+    off: jest.fn(),
+  },
+}));
 
 describe("weatherResultView", () => {
   let container;
@@ -29,21 +36,19 @@ describe("weatherResultView", () => {
     );
 
     mockWeatherModel = {
-      status: true,
-      message: "",
       temperature: 25,
       weatherText: "Sunny",
       weatherIcon: 1,
       windSpeed: 15,
       windDirection: "N",
       windDirectionDegrees: 90,
-      pressure: 1013,
-      visibility: 10,
       uvIndex: 5,
       realFeel: 24,
       location: { name: "London" },
       getPressureInMM: jest.fn().mockReturnValue(760),
     };
+
+    bus.on.mockClear();
   });
 
   afterEach(() => {
@@ -85,10 +90,31 @@ describe("weatherResultView", () => {
       const temperatureCell = document.querySelector(".temperatureCell");
       expect(temperatureCell).toBeTruthy();
     });
+
+    it("should subscribe to bus events", () => {
+      weatherResultView.renderWeatherResult(container);
+
+      expect(bus.on).toHaveBeenCalledWith(
+        "weather:loadingStart",
+        expect.any(Function),
+      );
+      expect(bus.on).toHaveBeenCalledWith(
+        "weather:loadingEnd",
+        expect.any(Function),
+      );
+      expect(bus.on).toHaveBeenCalledWith(
+        "weather:dataLoaded",
+        expect.any(Function),
+      );
+      expect(bus.on).toHaveBeenCalledWith(
+        "weather:error",
+        expect.any(Function),
+      );
+    });
   });
 
   describe("showLoading", () => {
-    it("should hide grid container and show text block", () => {
+    it("should hide grid container", () => {
       weatherResultView.renderWeatherResult(container);
 
       const gridContainer = document.querySelector(".grid-container");

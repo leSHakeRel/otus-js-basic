@@ -1,5 +1,6 @@
 import "./weatherResult.css";
 import { addElement } from "./view.js";
+import { bus } from "./eventbus.js";
 
 const WIND_ICON_SVG = `
   <svg fill="#006bc2" height="32px" width="32px" version="1.1" viewBox="0 0 512.003 512.003">
@@ -13,12 +14,15 @@ const WIND_ICON_SVG = `
 `;
 
 let elements = {};
+let subscribers = [];
 
 /**
  * Рендер UI результатов
  * @param { HTMLElement } container - заполнение контейнера виджетами
  */
 export function renderWeatherResult(container) {
+  subscribers.forEach((unsubscribe) => unsubscribe());
+  subscribers = [];
   const mainSection = addElement(container, "section", "", "resultSection");
   const cityName = addElement(mainSection, "div", "", "resultSection-cityName");
   const cityBlockText = addElement(cityName, "div", "", "cityName-block-text");
@@ -51,6 +55,17 @@ export function renderWeatherResult(container) {
   };
 
   buildGridItems(gridContainer);
+
+  subscribers.push(
+    bus.on("weather:loadingStart", showLoading),
+    bus.on("weather:loadingEnd", () => {
+      if (elements.gridContainer) {
+        elements.gridContainer.style.visibility = "visible";
+      }
+    }),
+    bus.on("weather:dataLoaded", showWeatherData),
+    bus.on("weather:error", showError),
+  );
 }
 
 /**
