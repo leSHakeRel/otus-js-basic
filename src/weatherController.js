@@ -3,11 +3,16 @@ import * as locationModel from "./locationModel.js";
 import * as weatherModel from "./weatherModel.js";
 import * as weatherSearchView from "./weatherSearchView.js";
 import * as weatherResultView from "./weatherResultView.js";
-
-let currentWeather = null;
+import { bus } from "./eventbus.js";
 
 export function initController() {
   loadSavedData();
+
+  bus.on("weather:dataNeeded", () => {
+    if (currentWeather) {
+      bus.emit("weather:dataLoaded", currentWeather);
+    }
+  });
 }
 
 async function loadSavedData() {
@@ -31,11 +36,12 @@ async function loadSavedData() {
  * @param {Object} searchData - параметры поиска
  */
 export async function fetchWeather(searchData) {
-  weatherResultView.showLoading();
+  bus.emit("weather:loadingStart");
 
   try {
     let location;
     let weatherData;
+    console.log("received locatio");
 
     if (searchData.type === "auto") {
       const ipLocation = await weatherApi.getLocationByIP();
@@ -58,12 +64,14 @@ export async function fetchWeather(searchData) {
     }
 
     const weather = weatherModel.createWeatherModel(weatherData, location);
-    currentWeather = weather;
-    weatherResultView.showWeatherData(weather);
+
+    bus.emit("weather:dataLoaded", weather);
+    bus.emit("weather:loadingEnd");
 
     localStorage.setItem("searchData", JSON.stringify(searchData));
   } catch (error) {
     console.error("Ошибка получения погоды:", error);
-    weatherResultView.showError(error.message);
+    bus.emit("weather:error", error.message);
+    bus.emit("weather:loadingEnd");
   }
 }
