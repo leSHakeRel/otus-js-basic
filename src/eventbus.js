@@ -104,28 +104,24 @@ class EventBus {
    * Асинхронный вызов события
    * @param {string} event - Название события
    * @param {...any} args - Аргументы для обработчиков
-   * @returns {Promise<Array>} Promise с массивом результатов
    */
   async emitAsync(event, ...args) {
-    if (!this.events.has(event)) return [];
+    if (!this.events.has(event)) return;
 
     const listeners = [...this.events.get(event)];
-    const results = [];
     let hasOnceListeners = false;
 
     for (const listener of listeners) {
       const context = listener.context || this;
 
       try {
-        const result = await listener.callback.apply(context, args);
-        results.push(result);
+        await listener.callback.apply(context, args);
 
         if (listener.once) {
           hasOnceListeners = true;
         }
       } catch (error) {
         console.error(`Error in event ${event}:`, error);
-        results.push(error);
       }
     }
 
@@ -141,8 +137,6 @@ class EventBus {
         this.events.set(event, remaining);
       }
     }
-
-    return results;
   }
 
   /**

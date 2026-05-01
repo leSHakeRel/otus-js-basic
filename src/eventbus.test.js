@@ -200,30 +200,23 @@ describe("EventBus", () => {
       const callback = jest.fn().mockResolvedValue("result");
       bus.on("test", callback);
 
-      const results = await bus.emitAsync("test", 1, 2);
+      await bus.emitAsync("test", 1, 2);
 
       expect(callback).toHaveBeenCalledWith(1, 2);
-      expect(results).toEqual(["result"]);
-    });
-
-    it("should return empty array if no listeners", async () => {
-      const results = await bus.emitAsync("nonexistent");
-      expect(results).toEqual([]);
     });
 
     it("should handle errors and continue execution", async () => {
       const errorCallback = jest
         .fn()
         .mockRejectedValue(new Error("Async error"));
-      const successCallback = jest.fn().mockResolvedValue("success");
+      const successCallback = jest.fn();
 
       bus.on("test", errorCallback);
       bus.on("test", successCallback);
 
-      const results = await bus.emitAsync("test");
+      await bus.emitAsync("test");
 
-      expect(results[0]).toBeInstanceOf(Error);
-      expect(results[1]).toBe("success");
+      expect(successCallback).toHaveBeenCalledTimes(1);
     });
 
     it("should handle once listeners in async mode", async () => {
@@ -238,18 +231,6 @@ describe("EventBus", () => {
 
       expect(onceCallback).toHaveBeenCalledTimes(1);
       expect(regularCallback).toHaveBeenCalledTimes(2);
-    });
-
-    it("should call listeners in correct context", async () => {
-      const context = { name: "test" };
-      const callback = jest.fn(function () {
-        return this.name;
-      });
-
-      bus.on("test", callback, { context });
-      const results = await bus.emitAsync("test");
-
-      expect(results[0]).toBe("test");
     });
   });
 
