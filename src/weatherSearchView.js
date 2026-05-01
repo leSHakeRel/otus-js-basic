@@ -1,18 +1,16 @@
 import "./weatherSearch.css";
+import { bus } from "./eventbus.js";
 
 let form = null;
 let cityNameInput = null;
 let radios = null;
-let onSubmitCallback = null;
 
 /**
  * Рендер UI поиска
  * @param { HTMLElement } container - контейнер для заполнения виджетом поиска
  * @param {*} onSearchSubmit - колбек на запрос поиска
  */
-export function renderWeatherSearch(container, onSearchSubmit) {
-  onSubmitCallback = onSearchSubmit;
-
+export function renderWeatherSearch(container) {
   const sectionElement = document.createElement("section");
   sectionElement.classList.add("search");
   sectionElement.innerHTML = `
@@ -51,9 +49,8 @@ function processSubmit() {
     type: formData.get("searchType"),
     cityName: formData.get("cityName"),
   };
-  if (onSubmitCallback) {
-    onSubmitCallback(searchData);
-  }
+
+  bus.emit("search:submit", searchData);
 }
 
 /**

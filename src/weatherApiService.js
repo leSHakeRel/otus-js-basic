@@ -5,6 +5,7 @@ import apiConfig from "./weather.config.js";
  * @returns {string} IP-адрес
  */
 export async function getPublicIP() {
+  console.log(`${apiConfig.IPIFY_BASE_URL}?format=json`);
   const response = await fetch(`${apiConfig.IPIFY_BASE_URL}?format=json`);
   if (!response.ok) {
     throw new Error("Ошибка получения IP-адреса");
@@ -19,6 +20,8 @@ export async function getPublicIP() {
  */
 export async function getLocationByIP() {
   const ip = await getPublicIP();
+  console.log(ip);
+  console.log("in getLocationByIP", `${apiConfig.IPAPI_BASE_URL}/${ip}`);
   const response = await fetch(`${apiConfig.IPAPI_BASE_URL}/${ip}`);
 
   if (!response.ok) {
@@ -26,6 +29,7 @@ export async function getLocationByIP() {
   }
 
   const data = await response.json();
+  console.log(data);
 
   if (data.status !== "success") {
     throw new Error("Не удалось определить локацию по IP");
