@@ -21,6 +21,7 @@ let subscribers = [];
  * @param { HTMLElement } container - заполнение контейнера виджетами
  */
 export function renderWeatherResult(container) {
+  container.innerHTML = "";
   subscribers.forEach((unsubscribe) => unsubscribe());
   subscribers = [];
   const mainSection = addElement(container, "section", "", "resultSection");

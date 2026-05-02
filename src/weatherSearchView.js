@@ -63,6 +63,7 @@ function attachEvents() {
     event.preventDefault();
     processSubmit();
   });
+  bus.on("weather:addCity", setCityName);
 }
 
 /**

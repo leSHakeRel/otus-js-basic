@@ -4,6 +4,11 @@ import * as weatherModel from "./weatherModel.js";
 import * as weatherSearchView from "./weatherSearchView.js";
 import * as weatherResultView from "./weatherResultView.js";
 import { bus } from "./eventbus.js";
+import { router } from "./router.js";
+import { weatherStorage } from "./weatherStorageService.js";
+
+let currentWeather = null;
+let currentSearchData = null;
 
 export function initController() {
   loadSavedData();
@@ -16,32 +21,33 @@ export function initController() {
 }
 
 async function loadSavedData() {
-  const savedData = localStorage.getItem("searchData");
-  if (savedData) {
-    const searchData = JSON.parse(savedData);
-
-    if (searchData.type === "city") {
+  const currentParams = router.getCurrentParams();
+  if (!currentParams) return;
+  if (currentParams.city) {
+    const cityName = decodeURIComponent(currentParams.city);
+    weatherSearchView.setSearchType("city");
+    weatherSearchView.setCityName(cityName);
+    await fetchWeather({ type: "city", cityName: cityName });
+  } else {
+    const lastCity = weatherStorage.getLastCity();
+    if (lastCity) {
       weatherSearchView.setSearchType("city");
-      weatherSearchView.setCityName(searchData.cityName);
+      weatherSearchView.setCityName(lastCity);
+      await fetchWeather({ type: "city", cityName: lastCity });
     } else {
       weatherSearchView.setSearchType("auto");
+      await fetchWeather({ type: "auto" });
     }
-
-    await fetchWeather(searchData);
   }
 }
 
-/**
- * Получение погоды
- * @param {Object} searchData - параметры поиска
- */
 export async function fetchWeather(searchData) {
+  currentSearchData = searchData;
   bus.emit("weather:loadingStart");
 
   try {
     let location;
     let weatherData;
-    console.log("received locatio");
 
     if (searchData.type === "auto") {
       const ipLocation = await weatherApi.getLocationByIP();
@@ -59,19 +65,26 @@ export async function fetchWeather(searchData) {
         location.geo.lat,
         location.geo.lng,
       );
+
+      bus.emit("weather:addCity", searchData.cityName);
     } else {
       throw new Error("Неизвестный тип локации");
     }
 
     const weather = weatherModel.createWeatherModel(weatherData, location);
+    currentWeather = weather;
 
     bus.emit("weather:dataLoaded", weather);
     bus.emit("weather:loadingEnd");
-
-    localStorage.setItem("searchData", JSON.stringify(searchData));
   } catch (error) {
     console.error("Ошибка получения погоды:", error);
     bus.emit("weather:error", error.message);
     bus.emit("weather:loadingEnd");
   }
 }
+
+export function getCurrentWeather() {
+  return currentWeather;
+}
+
+export { weatherStorage };
