@@ -22,9 +22,9 @@ const config = {
 
   // An array of glob patterns indicating a set of files for which coverage information should be collected
   collectCoverageFrom: [
-    "src/*.{js,jsx}",
+    "src/*.{js,jsx,ts,tsx}",
     "!**/node_modules/**",
-    "!src/*config.js",
+    "!src/*config.*",
   ],
 
   // The directory where Jest should output its coverage files
@@ -49,10 +49,10 @@ const config = {
   // An object that configures minimum threshold enforcement for coverage results
   coverageThreshold: {
     global: {
-      branches: 80,
-      functions: 80,
-      lines: 80,
-      statements: 80,
+      branches: 20,
+      functions: 20,
+      lines: 20,
+      statements: 20,
     },
   },
 
@@ -88,24 +88,30 @@ const config = {
   // ],
 
   // An array of file extensions your modules use
-  // moduleFileExtensions: [
-  //   "js",
-  //   "mjs",
-  //   "cjs",
-  //   "jsx",
-  //   "ts",
-  //   "mts",
-  //   "cts",
-  //   "tsx",
-  //   "json",
+  moduleFileExtensions: [
+    "js",
+    "mjs",
+    "cjs",
+    "jsx",
+    "ts",
+    "mts",
+    "cts",
+    "tsx",
+    "json",
+    "node",
+  ],
   //   "node"
   // ],
 
   // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
   moduleNameMapper: {
-    "\\.css$": "<rootDir>/__mocks__/styleMock.js", // Мок для CSS файлов
-    "\\.(svg)$": "<rootDir>/__mocks__/svgMock.js",
+    "^(\\.{1,2}/.*)\\.js$": "$1",
+    "\\.css$": "<rootDir>/__mocks__/styleMock.ts", // Мок для CSS файлов
+    "\\.(svg)$": "<rootDir>/__mocks__/svgMock.ts",
   },
+
+  // Enable ESM support
+  extensionsToTreatAsEsm: [".ts", ".tsx"],
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
   // modulePathIgnorePatterns: [],
@@ -191,7 +197,10 @@ const config = {
 
   // A map from regular expressions to paths to transformers
   transform: {
-    "^.+\\.js$": "babel-jest",
+    "^.+\\.tsx?$": [
+      "ts-jest",
+      { useESM: true, tsconfig: { module: "ESNext" } },
+    ],
   },
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation

@@ -1,6 +1,6 @@
 import "./weatherResult.css";
-import { addElement } from "./view.js";
-import { bus } from "./eventbus.js";
+import { addElement } from "./view";
+import { bus } from "./eventbus";
 
 const WIND_ICON_SVG = `
   <svg fill="#006bc2" height="32px" width="32px" version="1.1" viewBox="0 0 512.003 512.003">
@@ -13,19 +13,58 @@ const WIND_ICON_SVG = `
   </svg>
 `;
 
-let elements = {};
-let subscribers = [];
+interface Elements {
+  cityNameText: HTMLElement | null;
+  cityNameError: HTMLElement | null;
+  cityBlockText: HTMLElement | null;
+  cityBlockError: HTMLElement | null;
+  gridContainer: HTMLElement | null;
+  weatherIcon: HTMLElement | null;
+  weatherText: HTMLElement | null;
+  temperatureValue: HTMLElement | null;
+  feelTemperatureValue: HTMLElement | null;
+  pressureValue: HTMLElement | null;
+  windSpeedValue: HTMLElement | null;
+  windDirectionIcon: HTMLElement | null;
+  uvIndexValue: HTMLElement | null;
+}
+
+interface WeatherModel {
+  temperature: number;
+  weatherText: string;
+  weatherIcon: number;
+  windSpeed: number;
+  windDirection: string;
+  windDirectionDegrees: number;
+  pressure: number;
+  visibility: number;
+  uvIndex: number;
+  realFeel: number;
+  location: {
+    name: string;
+  };
+  getPressureInMM(): number | null;
+}
+
+let elements: Elements = {} as Elements;
+let subscribers: Array<() => void> = [];
 
 /**
  * Рендер UI результатов
- * @param { HTMLElement } container - заполнение контейнера виджетами
+ * @param container - заполнение контейнера виджетами
  */
-export function renderWeatherResult(container) {
+export function renderWeatherResult(container: HTMLElement): void {
+  container.innerHTML = "";
   subscribers.forEach((unsubscribe) => unsubscribe());
   subscribers = [];
-  const mainSection = addElement(container, "section", "", "resultSection");
-  const cityName = addElement(mainSection, "div", "", "resultSection-cityName");
-  const cityBlockText = addElement(cityName, "div", "", "cityName-block-text");
+  const mainSection = addElement(container, "section", "", "resultSection")!;
+  const cityName = addElement(
+    mainSection,
+    "div",
+    "",
+    "resultSection-cityName",
+  )!;
+  const cityBlockText = addElement(cityName, "div", "", "cityName-block-text")!;
   addElement(cityBlockText, "p", "", "cityName-text");
 
   const cityBlockError = addElement(
@@ -33,10 +72,10 @@ export function renderWeatherResult(container) {
     "div",
     "",
     "cityName-block-error",
-  );
+  )!;
   addElement(cityBlockError, "p", "", "cityName-error");
 
-  const gridContainer = addElement(mainSection, "div", "", "grid-container");
+  const gridContainer = addElement(mainSection, "div", "", "grid-container")!;
 
   elements = {
     cityNameText: document.querySelector(".cityName-text"),
@@ -70,9 +109,9 @@ export function renderWeatherResult(container) {
 
 /**
  * Построение грида с данными
- * @param { HTMLElement } gridContainer - контейнер
+ * @param gridContainer - контейнер
  */
-function buildGridItems(gridContainer) {
+function buildGridItems(gridContainer: HTMLElement): void {
   const items = [
     { label: "Ощущается", value: "feelTemperatureValue" },
     { label: "Давление", value: "pressureValue" },
@@ -84,27 +123,27 @@ function buildGridItems(gridContainer) {
   const tempCell = addElement(gridContainer, "div", "", [
     "grid-item",
     "temperatureCell",
-  ]);
-  const tempCellItem = addElement(tempCell, "div", "", "cellItem");
-  elements.weatherIcon = addElement(tempCellItem, "p", "", "weatherIcon");
-  elements.weatherText = addElement(tempCellItem, "p", "", "weatherText");
+  ])!;
+  const tempCellItem = addElement(tempCell, "div", "", "cellItem")!;
+  elements.weatherIcon = addElement(tempCellItem, "p", "", "weatherIcon")!;
+  elements.weatherText = addElement(tempCellItem, "p", "", "weatherText")!;
   addElement(tempCellItem, "p", "Температура");
   elements.temperatureValue = addElement(
     tempCellItem,
     "p",
     "",
     "temperatureValue",
-  );
+  )!;
 
   items.forEach((item) => {
-    const cell = addElement(gridContainer, "div", "", "grid-item");
-    const cellItem = addElement(cell, "div", "", "cellItem");
+    const cell = addElement(gridContainer, "div", "", "grid-item")!;
+    const cellItem = addElement(cell, "div", "", "cellItem")!;
 
     if (item.label) {
       addElement(cellItem, "p", item.label);
     }
 
-    const valueElement = addElement(cellItem, "p", "", item.value);
+    const valueElement = addElement(cellItem, "p", "", item.value)!;
     if (item.value === "feelTemperatureValue")
       elements.feelTemperatureValue = valueElement;
     if (item.value === "pressureValue") elements.pressureValue = valueElement;
@@ -115,7 +154,7 @@ function buildGridItems(gridContainer) {
   });
 }
 
-export function showLoading() {
+export function showLoading(): void {
   if (elements.gridContainer) {
     elements.gridContainer.style.visibility = "hidden";
   }
@@ -125,9 +164,9 @@ export function showLoading() {
 
 /**
  * Показать ошибку
- * @param {string} message - текст ошибки
+ * @param message - текст ошибки
  */
-export function showError(message) {
+export function showError(message: string): void {
   showErrorBlock(true);
   showTextBlock(false);
   if (elements.cityNameError) {
@@ -140,9 +179,9 @@ export function showError(message) {
 
 /**
  * Отображение погоды
- * @param {Object} weatherModel - модель данных погоды
+ * @param weatherModel - модель данных погоды
  */
-export function showWeatherData(weatherModel) {
+export function showWeatherData(weatherModel: WeatherModel): void {
   showErrorBlock(false);
   showTextBlock(true);
 
@@ -156,7 +195,7 @@ export function showWeatherData(weatherModel) {
 
   fillCell(elements.temperatureValue, weatherModel.temperature, "° C");
   fillCell(elements.feelTemperatureValue, weatherModel.realFeel, "° C");
-  fillCell(elements.weatherText, weatherModel.weatherText);
+  fillCell(elements.weatherText, String(weatherModel.weatherText));
   fillCell(
     elements.pressureValue,
     weatherModel.getPressureInMM(),
@@ -171,11 +210,15 @@ export function showWeatherData(weatherModel) {
 
 /**
  * Заполнение "кубиков" информацией
- * @param {string} className - текст для селектора
- * @param {*} value - значение параметра
- * @param {string} unit - единица измерения
+ * @param element - элемент для заполнения
+ * @param value - значение параметра
+ * @param unit - единица измерения
  */
-function fillCell(element, value, unit = "") {
+function fillCell(
+  element: HTMLElement | null,
+  value: string | number | null | undefined,
+  unit: string = "",
+): void {
   if (element) {
     element.textContent = `${value === undefined || value === null ? "" : value}${unit}`;
   }
@@ -183,9 +226,9 @@ function fillCell(element, value, unit = "") {
 
 /**
  * Установка иконки погоды
- * @param {number} iconCode - код иконки погоды
+ * @param iconCode - код иконки погоды
  */
-async function setWeatherIcon(iconCode) {
+async function setWeatherIcon(iconCode: number): Promise<void> {
   if (elements.weatherIcon) {
     const img = document.createElement("img");
     img.src = `https://cdn.discover.swiss/icons/weather/ds-weather-${iconCode}.svg`;
@@ -198,25 +241,27 @@ async function setWeatherIcon(iconCode) {
 
 /**
  * Установка иконки ветра
- * @param {number} degrees - градусы направления ветра
+ * @param degrees - градусы направления ветра
  */
-function setWindIcon(degrees) {
+function setWindIcon(degrees: number): void {
   if (elements.windDirectionIcon) {
     const div = document.createElement("div");
     div.innerHTML = WIND_ICON_SVG;
-    const svg = div.firstElementChild;
-    svg.style.transition = "transform 0.3s ease";
-    svg.style.transform = `rotate(${degrees}deg)`;
-    elements.windDirectionIcon.replaceChildren();
-    elements.windDirectionIcon.append(div);
+    const svg = div.firstElementChild as SVGElement | null;
+    if (svg) {
+      svg.style.transition = "transform 0.3s ease";
+      svg.style.transform = `rotate(${degrees}deg)`;
+      elements.windDirectionIcon.replaceChildren();
+      elements.windDirectionIcon.append(div);
+    }
   }
 }
 
 /**
  * Управление отображением блока ошибки
- * @param {boolean} show - флаг отображения ошибки
+ * @param show - флаг отображения ошибки
  */
-function showErrorBlock(show) {
+function showErrorBlock(show: boolean): void {
   if (elements.cityBlockError) {
     elements.cityBlockError.style.display = show ? "flex" : "none";
   }
@@ -224,9 +269,9 @@ function showErrorBlock(show) {
 
 /**
  * Управление отображением текстового блока
- * @param {boolean} show - флаг отображения
+ * @param show - флаг отображения
  */
-function showTextBlock(show) {
+function showTextBlock(show: boolean): void {
   if (elements.cityBlockText) {
     elements.cityBlockText.style.display = show ? "flex" : "none";
   }

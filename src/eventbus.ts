@@ -1,4 +1,12 @@
+interface EventListener {
+  callback: Function;
+  once: boolean;
+  context: unknown | null;
+}
+
 class EventBus {
+  private events: Map<string, EventListener[]>;
+
   constructor() {
     this.events = new Map();
   }
@@ -12,7 +20,11 @@ class EventBus {
    * @param {Object} options.context - Контекст функции обработчика
    * @returns {Function} Функция для отписки
    */
-  on(event, callback, options = {}) {
+  on(
+    event: string,
+    callback: Function,
+    options: { once?: boolean; context?: unknown } = {},
+  ): () => void {
     if (typeof callback !== "function") {
       throw new Error("Callback must be a function");
     }
@@ -21,14 +33,14 @@ class EventBus {
       this.events.set(event, []);
     }
 
-    const listener = {
+    const listener: EventListener = {
       callback,
       once: options.once || false,
       context: options.context || null,
     };
 
     const listeners = this.events.get(event);
-    listeners.push(listener);
+    listeners?.push(listener);
 
     return () => this.off(event, callback);
   }
@@ -36,7 +48,11 @@ class EventBus {
   /**
    * Подписка на событие с выполнением только один раз
    */
-  once(event, callback, options = {}) {
+  once(
+    event: string,
+    callback: Function,
+    options: { context?: unknown } = {},
+  ): () => void {
     return this.on(event, callback, { ...options, once: true });
   }
 
@@ -45,7 +61,7 @@ class EventBus {
    * @param {string} event - Название события
    * @param {Function} callback - Функция-обработчик
    */
-  off(event, callback) {
+  off(event: string, callback?: Function): this {
     if (!this.events.has(event)) return this;
 
     if (!callback) {
@@ -54,7 +70,7 @@ class EventBus {
     }
 
     const listeners = this.events.get(event);
-    const filtered = listeners.filter((l) => l.callback !== callback);
+    const filtered = listeners?.filter((l) => l.callback !== callback) || [];
 
     if (filtered.length === 0) {
       this.events.delete(event);
@@ -68,12 +84,12 @@ class EventBus {
   /**
    * Вызов события
    * @param {string} event - Название события
-   * @param {...any} args - Аргументы для обработчиков
+   * @param {...unknown} args - Аргументы для обработчиков
    */
-  emit(event, ...args) {
+  emit(event: string, ...args: unknown[]): boolean {
     if (!this.events.has(event)) return false;
 
-    const listeners = [...this.events.get(event)];
+    const listeners = [...(this.events.get(event) || [])];
     let hasOnceListeners = false;
 
     for (const listener of listeners) {
@@ -86,9 +102,8 @@ class EventBus {
     }
 
     if (hasOnceListeners) {
-      const remaining = this.events
-        .get(event)
-        .filter((listener) => !listener.once);
+      const remaining =
+        this.events.get(event)?.filter((listener) => !listener.once) || [];
 
       if (remaining.length === 0) {
         this.events.delete(event);
@@ -103,12 +118,12 @@ class EventBus {
   /**
    * Асинхронный вызов события
    * @param {string} event - Название события
-   * @param {...any} args - Аргументы для обработчиков
+   * @param {...unknown} args - Аргументы для обработчиков
    */
-  async emitAsync(event, ...args) {
+  async emitAsync(event: string, ...args: unknown[]): Promise<void> {
     if (!this.events.has(event)) return;
 
-    const listeners = [...this.events.get(event)];
+    const listeners = [...(this.events.get(event) || [])];
     let hasOnceListeners = false;
 
     for (const listener of listeners) {
@@ -127,9 +142,8 @@ class EventBus {
 
     // Удаляем одноразовые обработчики
     if (hasOnceListeners) {
-      const remaining = this.events
-        .get(event)
-        .filter((listener) => !listener.once);
+      const remaining =
+        this.events.get(event)?.filter((listener) => !listener.once) || [];
 
       if (remaining.length === 0) {
         this.events.delete(event);
@@ -142,7 +156,7 @@ class EventBus {
   /**
    * Очистить все события
    */
-  clear() {
+  clear(): this {
     this.events.clear();
     return this;
   }

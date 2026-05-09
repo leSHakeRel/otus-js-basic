@@ -1,4 +1,5 @@
-import { createWeatherModel } from "./weatherModel";
+/// <reference types="jest" />
+import { createWeatherModel } from "./weatherModel.ts";
 
 describe("createWeatherModel", () => {
   const mockApiData = {
@@ -15,8 +16,12 @@ describe("createWeatherModel", () => {
   };
 
   const mockLocation = {
+    key: "51.5,-0.1",
     name: "London",
+    country: "UK",
+    localizedName: "London",
     geo: { lat: 51.5, lng: -0.1 },
+    timeZone: "Europe/London",
   };
 
   it("should create weather model with all properties", () => {
@@ -44,15 +49,18 @@ describe("createWeatherModel", () => {
   });
 
   it("should return null for pressure in mmHg when pressure is null", () => {
-    const dataWithNullPressure = { ...mockApiData, pressure: null };
+    const dataWithNullPressure = {
+      ...mockApiData,
+      pressure: null as unknown as number,
+    };
     const result = createWeatherModel(dataWithNullPressure, mockLocation);
 
     expect(result.getPressureInMM()).toBeNull();
   });
 
-  it("should return null for pressure in mmHg when pressure is undefined", () => {
-    const dataWithUndefinedPressure = { ...mockApiData, pressure: undefined };
-    const result = createWeatherModel(dataWithUndefinedPressure, mockLocation);
+  it("should return null for pressure in mmHg when pressure is 0", () => {
+    const dataWithZeroPressure = { ...mockApiData, pressure: 0 };
+    const result = createWeatherModel(dataWithZeroPressure, mockLocation);
 
     expect(result.getPressureInMM()).toBeNull();
   });

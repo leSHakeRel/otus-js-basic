@@ -1,4 +1,8 @@
-import * as locationModel from "./locationModel";
+/// <reference types="jest" />
+import {
+  createLocationFromGeoData,
+  createLocationFromIPData,
+} from "./locationModel.ts";
 
 describe("locationModel", () => {
   describe("createLocationFromGeoData", () => {
@@ -11,7 +15,7 @@ describe("locationModel", () => {
         timezone: "Europe/London",
       };
 
-      const result = locationModel.createLocationFromGeoData(geoData);
+      const result = createLocationFromGeoData(geoData);
 
       expect(result).toEqual({
         key: "51.5074,-0.1278",
@@ -35,7 +39,7 @@ describe("locationModel", () => {
         timezone: "America/New_York",
       };
 
-      const result = locationModel.createLocationFromGeoData(geoData);
+      const result = createLocationFromGeoData(geoData);
 
       expect(result.key).toEqual("40.7128,-74.006");
       expect(result.name).toEqual("New York");
@@ -54,7 +58,7 @@ describe("locationModel", () => {
         timezone: "Australia/Sydney",
       };
 
-      const result = locationModel.createLocationFromGeoData(geoData);
+      const result = createLocationFromGeoData(geoData);
 
       expect(result.key).toEqual("-33.8688,-151.2093");
       expect(result.geo.lat).toEqual(-33.8688);
@@ -70,7 +74,7 @@ describe("locationModel", () => {
         timezone: "Asia/Tokyo",
       };
 
-      const result = locationModel.createLocationFromGeoData(geoData);
+      const result = createLocationFromGeoData(geoData);
 
       expect(result.key).toEqual("35.6895,139.6917");
       expect(result.geo.lat).toEqual(35.6895);
@@ -86,25 +90,25 @@ describe("locationModel", () => {
         timezone: "Europe/Paris",
       };
 
-      const result = locationModel.createLocationFromGeoData(geoData);
+      const result = createLocationFromGeoData(geoData);
 
       expect(result.key).toEqual("48.8566,2.3522");
       expect(result.geo.lat).toEqual(48.8566);
       expect(result.geo.lng).toEqual(2.3522);
     });
 
-    it("should handle missing timezone", () => {
+    it("should handle timezone", () => {
       const geoData = {
         latitude: 55.7558,
         longitude: 37.6173,
         name: "Moscow",
         country: "Russia",
-        timezone: undefined,
+        timezone: "Europe/Moscow",
       };
 
-      const result = locationModel.createLocationFromGeoData(geoData);
+      const result = createLocationFromGeoData(geoData);
 
-      expect(result.timeZone).toBeUndefined();
+      expect(result.timeZone).toBe("Europe/Moscow");
       expect(result.name).toEqual("Moscow");
     });
 
@@ -117,7 +121,7 @@ describe("locationModel", () => {
         timezone: "Europe/Berlin",
       };
 
-      const result = locationModel.createLocationFromGeoData(geoData);
+      const result = createLocationFromGeoData(geoData);
 
       expect(result.localizedName).toEqual(result.name);
       expect(result.localizedName).toEqual("Berlin");
@@ -134,7 +138,7 @@ describe("locationModel", () => {
         timezone: "America/Los_Angeles",
       };
 
-      const result = locationModel.createLocationFromIPData(ipData);
+      const result = createLocationFromIPData(ipData);
 
       expect(result).toEqual({
         key: "37.7749,-122.4194",
@@ -158,7 +162,7 @@ describe("locationModel", () => {
         timezone: "Europe/London",
       };
 
-      const result = locationModel.createLocationFromIPData(ipData);
+      const result = createLocationFromIPData(ipData);
 
       expect(result.key).toEqual("51.5074,-0.1278");
       expect(result.name).toEqual("London");
@@ -177,7 +181,7 @@ describe("locationModel", () => {
         timezone: "Asia/Tokyo",
       };
 
-      const result = locationModel.createLocationFromIPData(ipData);
+      const result = createLocationFromIPData(ipData);
 
       expect(result.key).toEqual("35.6895,139.6917");
       expect(result.name).toEqual("Tokyo");
@@ -195,7 +199,7 @@ describe("locationModel", () => {
         timezone: "Australia/Sydney",
       };
 
-      const result = locationModel.createLocationFromIPData(ipData);
+      const result = createLocationFromIPData(ipData);
 
       expect(result.key).toEqual("-33.8688,151.2093");
       expect(result.geo.lat).toEqual(-33.8688);
@@ -211,25 +215,25 @@ describe("locationModel", () => {
         timezone: "America/New_York",
       };
 
-      const result = locationModel.createLocationFromIPData(ipData);
+      const result = createLocationFromIPData(ipData);
 
       expect(result.key).toEqual("40.7128,-74.006");
       expect(result.geo.lat).toEqual(40.7128);
       expect(result.geo.lng).toEqual(-74.006);
     });
 
-    it("should handle missing timezone in IP data", () => {
+    it("should handle timezone in IP data", () => {
       const ipData = {
         lat: 55.7558,
         lon: 37.6173,
         city: "Moscow",
         country: "Russia",
-        timezone: undefined,
+        timezone: "Europe/Moscow",
       };
 
-      const result = locationModel.createLocationFromIPData(ipData);
+      const result = createLocationFromIPData(ipData);
 
-      expect(result.timeZone).toBeUndefined();
+      expect(result.timeZone).toBe("Europe/Moscow");
       expect(result.name).toEqual("Moscow");
     });
 
@@ -242,7 +246,7 @@ describe("locationModel", () => {
         timezone: "Europe/Paris",
       };
 
-      const result = locationModel.createLocationFromIPData(ipData);
+      const result = createLocationFromIPData(ipData);
 
       expect(result.localizedName).toEqual(result.name);
       expect(result.localizedName).toEqual("Paris");
@@ -257,7 +261,7 @@ describe("locationModel", () => {
         timezone: "America/Los_Angeles",
       };
 
-      const result = locationModel.createLocationFromIPData(ipData);
+      const result = createLocationFromIPData(ipData);
 
       expect(result.name).toEqual("Los Angeles");
       expect(result.localizedName).toEqual("Los Angeles");
@@ -272,7 +276,7 @@ describe("locationModel", () => {
         timezone: "Europe/Paris",
       };
 
-      const result = locationModel.createLocationFromIPData(ipData);
+      const result = createLocationFromIPData(ipData);
 
       expect(result.name).toEqual("Strasbourg");
       expect(result.country).toEqual("France");
@@ -297,8 +301,8 @@ describe("locationModel", () => {
         timezone: "Europe/Rome",
       };
 
-      const geoResult = locationModel.createLocationFromGeoData(geoData);
-      const ipResult = locationModel.createLocationFromIPData(ipData);
+      const geoResult = createLocationFromGeoData(geoData);
+      const ipResult = createLocationFromIPData(ipData);
 
       expect(geoResult.key).toEqual(ipResult.key);
       expect(geoResult.name).toEqual(ipResult.name);
@@ -325,8 +329,8 @@ describe("locationModel", () => {
         timezone: "UTC",
       };
 
-      const geoResult = locationModel.createLocationFromGeoData(geoData);
-      const ipResult = locationModel.createLocationFromIPData(ipData);
+      const geoResult = createLocationFromGeoData(geoData);
+      const ipResult = createLocationFromIPData(ipData);
 
       expect(geoResult.key).toEqual("0,0");
       expect(ipResult.key).toEqual("0,0");

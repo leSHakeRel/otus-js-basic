@@ -1,11 +1,60 @@
-import apiConfig from "./weather.config.js";
+import apiConfig from "./weather.config";
+
+interface LocationData {
+  lat: number;
+  lon: number;
+  city: string;
+  country: string;
+  timezone: string;
+}
+
+interface CityGeoData {
+  name: string;
+  latitude: number;
+  longitude: number;
+  country: string;
+  timezone: string;
+}
+
+interface WeatherData {
+  temperature: number;
+  weatherText: string;
+  weatherIcon: number;
+  windSpeed: number;
+  windDirection: string;
+  windDirectionDegrees: number;
+  pressure: number;
+  visibility: number;
+  uvIndex: number;
+  realFeel: number;
+}
+
+interface CurrentWeatherResponse {
+  current_weather: {
+    temperature: number;
+    windspeed: number;
+    winddirection: number;
+    weathercode: number;
+  };
+  hourly: {
+    pressure_msl?: number[];
+    visibility?: number[];
+  };
+}
+
+interface CitySearchResult {
+  name: string;
+  latitude: number;
+  longitude: number;
+  country: string;
+  timezone: string;
+}
 
 /**
  * Получение внешнего IP-адреса
- * @returns {string} IP-адрес
+ * @returns IP-адрес
  */
-export async function getPublicIP() {
-  console.log(`${apiConfig.IPIFY_BASE_URL}?format=json`);
+export async function getPublicIP(): Promise<string> {
   const response = await fetch(`${apiConfig.IPIFY_BASE_URL}?format=json`);
   if (!response.ok) {
     throw new Error("Ошибка получения IP-адреса");
@@ -16,12 +65,10 @@ export async function getPublicIP() {
 
 /**
  * Получение локации по IP
- * @returns {Object} - геолокация
+ * @returns геолокация
  */
-export async function getLocationByIP() {
+export async function getLocationByIP(): Promise<LocationData> {
   const ip = await getPublicIP();
-  console.log(ip);
-  console.log("in getLocationByIP", `${apiConfig.IPAPI_BASE_URL}/${ip}`);
   const response = await fetch(`${apiConfig.IPAPI_BASE_URL}/${ip}`);
 
   if (!response.ok) {
@@ -29,7 +76,6 @@ export async function getLocationByIP() {
   }
 
   const data = await response.json();
-  console.log(data);
 
   if (data.status !== "success") {
     throw new Error("Не удалось определить локацию по IP");
@@ -46,10 +92,12 @@ export async function getLocationByIP() {
 
 /**
  * Поиск города по названию
- * @param {string} cityName - название города
- * @returns {Object} - город
+ * @param cityName - название города
+ * @returns город
  */
-export async function getLocationByCity(cityName) {
+export async function getLocationByCity(
+  cityName: string,
+): Promise<CitySearchResult> {
   const url = new URL(`${apiConfig.OPEN_METEO_BASE_URL}/search`);
   url.searchParams.append("name", cityName);
   url.searchParams.append("count", "1");
@@ -71,17 +119,19 @@ export async function getLocationByCity(cityName) {
   return data.results[0];
 }
 
-//
 /**
  * Получение текущей погоды по геолокации
- * @param {number} lat - широта
- * @param {number} lon - долгота
- * @returns {Object} - погода
+ * @param lat - широта
+ * @param lon - долгота
+ * @returns погода
  */
-export async function getCurrentWeather(lat, lon) {
+export async function getCurrentWeather(
+  lat: number,
+  lon: number,
+): Promise<WeatherData> {
   const url = new URL(`${apiConfig.OPEN_METEO_WEATHER_URL}/forecast`);
-  url.searchParams.append("latitude", lat);
-  url.searchParams.append("longitude", lon);
+  url.searchParams.append("latitude", lat.toString());
+  url.searchParams.append("longitude", lon.toString());
   url.searchParams.append("current_weather", "true");
   url.searchParams.append(
     "hourly",
@@ -95,7 +145,7 @@ export async function getCurrentWeather(lat, lon) {
     throw new Error(`HTTP ошибка! Статус: ${response.status}`);
   }
 
-  const data = await response.json();
+  const data = (await response.json()) as CurrentWeatherResponse;
 
   if (!data.current_weather) {
     throw new Error("Данные о погоде не найдены");
@@ -125,11 +175,11 @@ export async function getCurrentWeather(lat, lon) {
 
 /**
  * Преобразование кода погоды Open-Meteo в иконку AccuWeather
- * @param {number} weatherCode - код погоды WMO
- * @returns {number} - код иконки для отображения
+ * @param weatherCode - код погоды WMO
+ * @returns код иконки для отображения
  */
-function mapWeatherCodeToIcon(weatherCode) {
-  const iconMap = {
+function mapWeatherCodeToIcon(weatherCode: number): number {
+  const iconMap: Record<number, number> = {
     0: 1,
     1: 2,
     2: 3,
@@ -164,11 +214,11 @@ function mapWeatherCodeToIcon(weatherCode) {
 
 /**
  * Получение текстового описания погоды по коду WMO
- * @param {number} code - код погоды
- * @returns {string} - описание погоды
+ * @param code - код погоды
+ * @returns описание погоды
  */
-function getWeatherDescription(code) {
-  const descriptions = {
+function getWeatherDescription(code: number): string {
+  const descriptions: Record<number, string> = {
     0: "Ясно",
     1: "В основном ясно",
     2: "Переменная облачность",
@@ -203,11 +253,11 @@ function getWeatherDescription(code) {
 
 /**
  * Получение стороны света по углу
- * @param {*} degrees - угол в градусах
- * @returns {string} - сторона света
+ * @param degrees - угол в градусах
+ * @returns сторона света
  */
-function getWindDirection(degrees) {
+function getWindDirection(degrees: number): string {
   const directions = ["С", "СВ", "В", "ЮВ", "Ю", "ЮЗ", "З", "СЗ"];
   const index = Math.round(degrees / 45) % 8;
-  return directions[index];
+  return directions[index] || "С";
 }

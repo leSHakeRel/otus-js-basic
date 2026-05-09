@@ -1,6 +1,7 @@
-import { bus } from "./eventbus";
+/// <reference types="jest" />
+import { bus } from "./eventbus.ts";
 
-describe("EventBus", () => {
+describe("eventbus", () => {
   beforeEach(() => {
     bus.clear();
   });
@@ -15,11 +16,15 @@ describe("EventBus", () => {
     });
 
     it("should throw error if callback is not a function", () => {
-      expect(() => bus.on("test", null)).toThrow("Callback must be a function");
-      expect(() => bus.on("test", "not a function")).toThrow(
+      expect(() => bus.on("test", null as unknown as Function)).toThrow(
         "Callback must be a function",
       );
-      expect(() => bus.on("test", {})).toThrow("Callback must be a function");
+      expect(() =>
+        bus.on("test", "not a function" as unknown as Function),
+      ).toThrow("Callback must be a function");
+      expect(() => bus.on("test", {} as unknown as Function)).toThrow(
+        "Callback must be a function",
+      );
     });
 
     it("should return unsubscribe function", () => {
@@ -56,7 +61,7 @@ describe("EventBus", () => {
       bus.emit("test");
 
       expect(callback).toHaveBeenCalled();
-      expect(callback.mock.results[0].value).toBe(42);
+      expect(callback.mock.results?.[0]?.value).toBe(42);
     });
   });
 
@@ -93,7 +98,7 @@ describe("EventBus", () => {
       bus.once("test", callback, { context });
       bus.emit("test");
 
-      expect(callback.mock.results[0].value).toBe(100);
+      expect(callback.mock.results?.[0]?.value).toBe(100);
     });
   });
 
@@ -179,7 +184,7 @@ describe("EventBus", () => {
       bus.once("test", jest.fn());
       bus.emit("test");
 
-      expect(bus.events.has("test")).toBe(false);
+      expect(bus["events"].has("test")).toBe(false);
     });
 
     it("should keep event when there are remaining non-once listeners", () => {
@@ -190,7 +195,7 @@ describe("EventBus", () => {
       bus.on("test", regularCallback);
       bus.emit("test");
 
-      expect(bus.events.has("test")).toBe(true);
+      expect(bus["events"].has("test")).toBe(true);
       expect(regularCallback).toHaveBeenCalledTimes(1);
     });
   });
@@ -242,7 +247,7 @@ describe("EventBus", () => {
 
       bus.clear();
 
-      expect(bus.events.size).toBe(0);
+      expect(bus["events"].size).toBe(0);
     });
 
     it("should return this for chaining", () => {

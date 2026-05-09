@@ -1,16 +1,19 @@
 import "./weatherSearch.css";
-import { bus } from "./eventbus.js";
+import { bus } from "./eventbus";
 
-let form = null;
-let cityNameInput = null;
-let radios = null;
+let form: HTMLFormElement | null = null;
+let cityNameInput: HTMLInputElement | null = null;
+let radios: NodeListOf<HTMLInputElement> | null = null;
 
 /**
  * Рендер UI поиска
- * @param { HTMLElement } container - контейнер для заполнения виджетом поиска
- * @param {*} onSearchSubmit - колбек на запрос поиска
+ * @param container - контейнер для заполнения виджетом поиска
+ * @param onSearchSubmit - колбек на запрос поиска
  */
-export function renderWeatherSearch(container) {
+export function renderWeatherSearch(
+  container: HTMLElement,
+  onSearchSubmit?: (searchData: SearchData) => void,
+): void {
   const sectionElement = document.createElement("section");
   sectionElement.classList.add("search");
   sectionElement.innerHTML = `
@@ -35,19 +38,28 @@ export function renderWeatherSearch(container) {
 
   container.append(sectionElement);
 
-  form = sectionElement.querySelector("#locationForm");
-  cityNameInput = sectionElement.querySelector(".cityNameInput");
+  form = sectionElement.querySelector("#locationForm") as HTMLFormElement;
+  cityNameInput = sectionElement.querySelector(
+    ".cityNameInput",
+  ) as HTMLInputElement;
   radios = sectionElement.querySelectorAll(`input[type='radio']`);
 
   toggleCityInput();
   attachEvents();
 }
 
-function processSubmit() {
+interface SearchData {
+  type: "auto" | "city";
+  cityName: string;
+}
+
+function processSubmit(): void {
+  if (!form) return;
+
   const formData = new FormData(form);
-  const searchData = {
-    type: formData.get("searchType"),
-    cityName: formData.get("cityName"),
+  const searchData: SearchData = {
+    type: formData.get("searchType") as "auto" | "city",
+    cityName: formData.get("cityName") as string,
   };
 
   bus.emit("search:submit", searchData);
@@ -56,20 +68,28 @@ function processSubmit() {
 /**
  * Подписка на события
  */
-function attachEvents() {
+function attachEvents(): void {
+  if (!radios) return;
+
   radios.forEach((radio) => radio.addEventListener("change", toggleCityInput));
 
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
-    processSubmit();
-  });
+  if (form) {
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      processSubmit();
+    });
+  }
+
+  bus.on("weather:addCity", setCityName);
 }
 
 /**
  * Показать/скрыть поле ввода города
  */
-function toggleCityInput() {
-  const isCitySelected = document.querySelector("#cityNameSearch")?.checked;
+function toggleCityInput(): void {
+  const isCitySelected = (
+    document.querySelector("#cityNameSearch") as HTMLInputElement
+  )?.checked;
   if (cityNameInput) {
     cityNameInput.style.display = isCitySelected ? "block" : "none";
   }
@@ -77,9 +97,9 @@ function toggleCityInput() {
 
 /**
  * Установка значения города
- * @param { string } value - название города
+ * @param value - название города
  */
-export function setCityName(value) {
+export function setCityName(value: string): void {
   if (cityNameInput) {
     cityNameInput.value = value;
   }
@@ -87,11 +107,13 @@ export function setCityName(value) {
 
 /**
  * Установка типа поиска
- * @param { string } type - тип поиска
+ * @param type - тип поиска
  */
-export function setSearchType(type) {
-  const autoRadio = document.querySelector("#ipSearch");
-  const cityRadio = document.querySelector("#cityNameSearch");
+export function setSearchType(type: "auto" | "city"): void {
+  const autoRadio = document.querySelector("#ipSearch") as HTMLInputElement;
+  const cityRadio = document.querySelector(
+    "#cityNameSearch",
+  ) as HTMLInputElement;
 
   if (type === "auto" && autoRadio) {
     autoRadio.checked = true;
