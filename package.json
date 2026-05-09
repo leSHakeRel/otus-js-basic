@@ -31,6 +31,7 @@
     "@babel/preset-env": "^7.29.0",
     "@eslint/js": "^10.0.1",
     "@jest/globals": "^30.2.0",
+    "@types/jest": "^30.0.0",
     "babel-jest": "^30.2.0",
     "babel-loader": "^10.1.0",
     "css-loader": "^7.1.4",
@@ -44,15 +45,18 @@
     "jest-environment-jsdom": "^30.2.0",
     "prettier": "3.8.1",
     "style-loader": "^4.0.0",
+    "ts-jest": "^29.4.9",
+    "ts-loader": "^9.5.7",
+    "typescript": "^6.0.3",
     "webpack": "^5.105.4",
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.3"
   },
   "lint-staged": {
-    "*.js": [
+    "*.{js,ts}": [
       "eslint --fix",
       "prettier --write"
     ],
-    "*.{js,css,md,yml,html,mjs}": "prettier --write"
+    "*.{js,ts,css,md,yml,html,mjs}": "prettier --write"
   }
 }
