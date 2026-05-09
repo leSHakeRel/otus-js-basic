@@ -12,6 +12,7 @@
     "eslint:fix": "eslint src --fix",
     "lint:check": "prettier --check .",
     "lint:fix": "prettier --write .",
+    "typecheck": "tsc --noEmit",
     "prepare": "husky"
   },
   "repository": {

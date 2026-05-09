@@ -39,7 +39,9 @@ export function renderWeatherSearch(
   container.append(sectionElement);
 
   form = sectionElement.querySelector("#locationForm") as HTMLFormElement;
-  cityNameInput = sectionElement.querySelector(".cityNameInput") as HTMLInputElement;
+  cityNameInput = sectionElement.querySelector(
+    ".cityNameInput",
+  ) as HTMLInputElement;
   radios = sectionElement.querySelectorAll(`input[type='radio']`);
 
   toggleCityInput();
@@ -53,7 +55,7 @@ interface SearchData {
 
 function processSubmit(): void {
   if (!form) return;
-  
+
   const formData = new FormData(form);
   const searchData: SearchData = {
     type: formData.get("searchType") as "auto" | "city",
@@ -68,7 +70,7 @@ function processSubmit(): void {
  */
 function attachEvents(): void {
   if (!radios) return;
-  
+
   radios.forEach((radio) => radio.addEventListener("change", toggleCityInput));
 
   if (form) {
@@ -77,7 +79,7 @@ function attachEvents(): void {
       processSubmit();
     });
   }
-  
+
   bus.on("weather:addCity", setCityName);
 }
 
@@ -85,7 +87,9 @@ function attachEvents(): void {
  * Показать/скрыть поле ввода города
  */
 function toggleCityInput(): void {
-  const isCitySelected = (document.querySelector("#cityNameSearch") as HTMLInputElement)?.checked;
+  const isCitySelected = (
+    document.querySelector("#cityNameSearch") as HTMLInputElement
+  )?.checked;
   if (cityNameInput) {
     cityNameInput.style.display = isCitySelected ? "block" : "none";
   }
@@ -107,7 +111,9 @@ export function setCityName(value: string): void {
  */
 export function setSearchType(type: "auto" | "city"): void {
   const autoRadio = document.querySelector("#ipSearch") as HTMLInputElement;
-  const cityRadio = document.querySelector("#cityNameSearch") as HTMLInputElement;
+  const cityRadio = document.querySelector(
+    "#cityNameSearch",
+  ) as HTMLInputElement;
 
   if (type === "auto" && autoRadio) {
     autoRadio.checked = true;

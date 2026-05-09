@@ -49,7 +49,10 @@ describe("createWeatherModel", () => {
   });
 
   it("should return null for pressure in mmHg when pressure is null", () => {
-    const dataWithNullPressure = { ...mockApiData, pressure: null as unknown as number };
+    const dataWithNullPressure = {
+      ...mockApiData,
+      pressure: null as unknown as number,
+    };
     const result = createWeatherModel(dataWithNullPressure, mockLocation);
 
     expect(result.getPressureInMM()).toBeNull();

@@ -44,7 +44,7 @@ export default {
     extensions: [".ts", ".js"],
     alias: {
       "@": path.resolve(__dirname, "src"),
-    },    
+    },
   },
   devServer: {
     static: {

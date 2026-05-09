@@ -10,7 +10,7 @@ class StorageService {
   private pfx: string;
 
   constructor() {
-    this.pfx = 'weather_app_';
+    this.pfx = "weather_app_";
   }
 
   /**
@@ -31,7 +31,7 @@ class StorageService {
     try {
       const prefixedKey = this._getPrefixedKey(key);
       const dataToStore =
-        typeof value === 'object' && value !== null
+        typeof value === "object" && value !== null
           ? JSON.stringify(value)
           : String(value);
       localStorage.setItem(prefixedKey, dataToStore);
@@ -117,7 +117,7 @@ class StorageService {
       keysToRemove.forEach((key) => localStorage.removeItem(key));
       return true;
     } catch (error) {
-      console.error('StorageService: ошибка очистки всех данных', error);
+      console.error("StorageService: ошибка очистки всех данных", error);
       return false;
     }
   }
@@ -126,5 +126,5 @@ class StorageService {
 export const storage = new StorageService();
 
 export const StorageKeys = {
-  SEARCH_HISTORY: 'searchHistory',
+  SEARCH_HISTORY: "searchHistory",
 };

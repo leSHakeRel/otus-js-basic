@@ -15,8 +15,7 @@ describe("weatherApiService", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    jest.isolateModules(() => {
-    });
+    jest.isolateModules(() => {});
   });
 
   describe("mapWeatherCodeToIcon", () => {
@@ -284,7 +283,7 @@ describe("weatherApiService", () => {
 
       expect(result).toBe(mockIp);
       expect(fetch).toHaveBeenCalledWith(
-        `${apiConfig.IPIFY_BASE_URL}?format=json`
+        `${apiConfig.IPIFY_BASE_URL}?format=json`,
       );
     });
 
@@ -322,55 +321,55 @@ describe("weatherApiService", () => {
           json: async () => mockLocation,
         });
 
-        const { getLocationByIP } = await import("./weatherApiService.ts");
-        const result = await getLocationByIP();
+      const { getLocationByIP } = await import("./weatherApiService.ts");
+      const result = await getLocationByIP();
 
-        expect(result).toEqual({
-          lat: 55.7558,
-          lon: 37.6173,
-          city: "Moscow",
-          country: "RU",
-          timezone: "Europe/Moscow",
+      expect(result).toEqual({
+        lat: 55.7558,
+        lon: 37.6173,
+        city: "Moscow",
+        country: "RU",
+        timezone: "Europe/Moscow",
+      });
+    });
+
+    it("should throw error when IPAPI returns status error", async () => {
+      const mockIp = "192.168.1.1";
+
+      (fetch as jest.Mock)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ ip: mockIp }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ status: "error", message: "Invalid IP" }),
         });
-      });
 
-      it("should throw error when IPAPI returns status error", async () => {
-        const mockIp = "192.168.1.1";
-
-        (fetch as jest.Mock)
-          .mockResolvedValueOnce({
-            ok: true,
-            json: async () => ({ ip: mockIp }),
-          })
-          .mockResolvedValueOnce({
-            ok: true,
-            json: async () => ({ status: "error", message: "Invalid IP" }),
-          });
-
-        const { getLocationByIP } = await import("./weatherApiService.ts");
-
-        await expect(getLocationByIP()).rejects.toThrow(
-          "Не удалось определить локацию по IP"
-        );
-      });
-
-      it("should throw error on HTTP error from IPAPI", async () => {
-        const mockIp = "192.168.1.1";
-
-        (fetch as jest.Mock)
-          .mockResolvedValueOnce({
-            ok: true,
-            json: async () => ({ ip: mockIp }),
-          })
-          .mockResolvedValueOnce({
-            ok: false,
-            status: 429,
-          });
-
-        const { getLocationByIP } = await import("./weatherApiService.ts");
+      const { getLocationByIP } = await import("./weatherApiService.ts");
 
       await expect(getLocationByIP()).rejects.toThrow(
-        "HTTP ошибка! Статус: 429"
+        "Не удалось определить локацию по IP",
+      );
+    });
+
+    it("should throw error on HTTP error from IPAPI", async () => {
+      const mockIp = "192.168.1.1";
+
+      (fetch as jest.Mock)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ ip: mockIp }),
+        })
+        .mockResolvedValueOnce({
+          ok: false,
+          status: 429,
+        });
+
+      const { getLocationByIP } = await import("./weatherApiService.ts");
+
+      await expect(getLocationByIP()).rejects.toThrow(
+        "HTTP ошибка! Статус: 429",
       );
     });
   });
@@ -397,7 +396,7 @@ describe("weatherApiService", () => {
       expect(fetch).toHaveBeenCalledWith(
         expect.objectContaining({
           toString: expect.any(Function),
-        })
+        }),
       );
     });
 
@@ -410,7 +409,7 @@ describe("weatherApiService", () => {
       const { getLocationByCity } = await import("./weatherApiService.ts");
 
       await expect(getLocationByCity("NonExistentCity12345")).rejects.toThrow(
-        'Город "NonExistentCity12345" не найден'
+        'Город "NonExistentCity12345" не найден',
       );
     });
 
@@ -423,7 +422,7 @@ describe("weatherApiService", () => {
       const { getLocationByCity } = await import("./weatherApiService.ts");
 
       await expect(getLocationByCity("TestCity")).rejects.toThrow(
-        "HTTP ошибка! Статус: 500"
+        "HTTP ошибка! Статус: 500",
       );
     });
 
@@ -549,7 +548,7 @@ describe("weatherApiService", () => {
       const { getCurrentWeather } = await import("./weatherApiService.ts");
 
       await expect(getCurrentWeather(55.7558, 37.6173)).rejects.toThrow(
-        "Данные о погоде не найдены"
+        "Данные о погоде не найдены",
       );
     });
 
@@ -562,7 +561,7 @@ describe("weatherApiService", () => {
       const { getCurrentWeather } = await import("./weatherApiService.ts");
 
       await expect(getCurrentWeather(55.7558, 37.6173)).rejects.toThrow(
-        "HTTP ошибка! Статус: 503"
+        "HTTP ошибка! Статус: 503",
       );
     });
 

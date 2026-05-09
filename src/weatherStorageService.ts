@@ -1,5 +1,5 @@
-import { storage, StorageKeys } from './storageService';
-import { bus } from './eventbus';
+import { storage, StorageKeys } from "./storageService";
+import { bus } from "./eventbus";
 
 interface WeatherStorageService {
   getSearchHistory(): string[];
@@ -40,7 +40,7 @@ class WeatherStorageService {
     filtered.unshift(cityName);
     const newHistory = filtered.slice(0, maxItems);
     this.saveSearchHistory(newHistory);
-    bus.emit('history:updated', newHistory);
+    bus.emit("history:updated", newHistory);
     return newHistory;
   }
 

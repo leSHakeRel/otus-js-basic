@@ -94,7 +94,9 @@ describe("runApp", () => {
   });
 
   it("should initialize history controller", () => {
-    const { historyController } = jest.requireMock("./weatherSearchHistoryController.ts");
+    const { historyController } = jest.requireMock(
+      "./weatherSearchHistoryController.ts",
+    );
 
     runApp(container);
 
@@ -103,7 +105,9 @@ describe("runApp", () => {
 
   it("should setup weather:addCity event listener", () => {
     const { weatherStorage } = jest.requireMock("./weatherStorageService.ts");
-    const { historyController } = jest.requireMock("./weatherSearchHistoryController.ts");
+    const { historyController } = jest.requireMock(
+      "./weatherSearchHistoryController.ts",
+    );
 
     runApp(container);
 
@@ -120,7 +124,10 @@ describe("runApp", () => {
 
     bus.emit("search:submit", { type: "city", cityName: "Paris" });
 
-    expect(fetchWeather).toHaveBeenCalledWith({ type: "city", cityName: "Paris" });
+    expect(fetchWeather).toHaveBeenCalledWith({
+      type: "city",
+      cityName: "Paris",
+    });
   });
 
   it("should handle invalid element", () => {
@@ -175,7 +182,10 @@ describe("runApp", () => {
 
     runApp(container);
 
-    expect(router.addRoute).toHaveBeenCalledWith("/weather/:city", expect.any(Function));
+    expect(router.addRoute).toHaveBeenCalledWith(
+      "/weather/:city",
+      expect.any(Function),
+    );
   });
 
   it("should setup routes for /about", () => {
@@ -183,7 +193,10 @@ describe("runApp", () => {
 
     runApp(container);
 
-    expect(router.addRoute).toHaveBeenCalledWith("/about", expect.any(Function));
+    expect(router.addRoute).toHaveBeenCalledWith(
+      "/about",
+      expect.any(Function),
+    );
   });
 
   it("should setup 404 handler", () => {
@@ -197,16 +210,18 @@ describe("runApp", () => {
   it("should render about page when navigating to /about", async () => {
     const { renderAbout } = jest.requireMock("./aboutView.ts");
     const { router } = jest.requireMock("./router.ts");
-    
+
     let aboutHandler: (() => Promise<void>) | undefined;
-    (router.addRoute as jest.Mock).mockImplementation((path: string, handler: () => Promise<void>) => {
-      if (path === "/about") {
-        aboutHandler = handler;
-      }
-    });
+    (router.addRoute as jest.Mock).mockImplementation(
+      (path: string, handler: () => Promise<void>) => {
+        if (path === "/about") {
+          aboutHandler = handler;
+        }
+      },
+    );
 
     runApp(container);
-    
+
     const mainContainer = container.querySelector(".main-container")!;
 
     if (aboutHandler) {
@@ -219,13 +234,17 @@ describe("runApp", () => {
   it("should fetch weather when navigating to /weather/:city", async () => {
     const { fetchWeather } = jest.requireMock("./weatherController.ts");
     const { router } = jest.requireMock("./router.ts");
-    
-    let weatherHandler: ((pathname: string, params: { city: string }) => Promise<void>) | undefined;
-    (router.addRoute as jest.Mock).mockImplementation((path: string, handler: any) => {
-      if (path === "/weather/:city") {
-        weatherHandler = handler;
-      }
-    });
+
+    let weatherHandler:
+      | ((pathname: string, params: { city: string }) => Promise<void>)
+      | undefined;
+    (router.addRoute as jest.Mock).mockImplementation(
+      (path: string, handler: any) => {
+        if (path === "/weather/:city") {
+          weatherHandler = handler;
+        }
+      },
+    );
 
     runApp(container);
 
@@ -233,19 +252,24 @@ describe("runApp", () => {
       await weatherHandler("/weather/moscow", { city: "moscow" });
     }
 
-    expect(fetchWeather).toHaveBeenCalledWith({ type: "city", cityName: "moscow" });
+    expect(fetchWeather).toHaveBeenCalledWith({
+      type: "city",
+      cityName: "moscow",
+    });
   });
 
   it("should fetch auto weather when navigating to /", async () => {
     const { fetchWeather } = jest.requireMock("./weatherController.ts");
     const { router } = jest.requireMock("./router.ts");
-    
+
     let rootHandler: (() => Promise<void>) | undefined;
-    (router.addRoute as jest.Mock).mockImplementation((path: string, handler: () => Promise<void>) => {
-      if (path === "/") {
-        rootHandler = handler;
-      }
-    });
+    (router.addRoute as jest.Mock).mockImplementation(
+      (path: string, handler: () => Promise<void>) => {
+        if (path === "/") {
+          rootHandler = handler;
+        }
+      },
+    );
 
     runApp(container);
 
@@ -259,15 +283,19 @@ describe("runApp", () => {
   it("should reinitialize UI when navigating to /main", async () => {
     const { renderWeatherSearch } = jest.requireMock("./weatherSearchView.ts");
     const { renderWeatherResult } = jest.requireMock("./weatherResultView.ts");
-    const { historyController } = jest.requireMock("./weatherSearchHistoryController.ts");
+    const { historyController } = jest.requireMock(
+      "./weatherSearchHistoryController.ts",
+    );
     const { router } = jest.requireMock("./router.ts");
-    
+
     let mainHandler: (() => Promise<void>) | undefined;
-    (router.addRoute as jest.Mock).mockImplementation((path: string, handler: () => Promise<void>) => {
-      if (path === "/main") {
-        mainHandler = handler;
-      }
-    });
+    (router.addRoute as jest.Mock).mockImplementation(
+      (path: string, handler: () => Promise<void>) => {
+        if (path === "/main") {
+          mainHandler = handler;
+        }
+      },
+    );
 
     runApp(container);
 

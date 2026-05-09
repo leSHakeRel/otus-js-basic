@@ -1,5 +1,8 @@
 /// <reference types="jest" />
-import { createLocationFromGeoData, createLocationFromIPData } from "./locationModel.ts";
+import {
+  createLocationFromGeoData,
+  createLocationFromIPData,
+} from "./locationModel.ts";
 
 describe("locationModel", () => {
   describe("createLocationFromGeoData", () => {

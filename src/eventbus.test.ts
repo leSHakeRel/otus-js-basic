@@ -16,11 +16,15 @@ describe("eventbus", () => {
     });
 
     it("should throw error if callback is not a function", () => {
-      expect(() => bus.on("test", null as unknown as Function)).toThrow("Callback must be a function");
-      expect(() => bus.on("test", "not a function" as unknown as Function)).toThrow(
+      expect(() => bus.on("test", null as unknown as Function)).toThrow(
         "Callback must be a function",
       );
-      expect(() => bus.on("test", {} as unknown as Function)).toThrow("Callback must be a function");
+      expect(() =>
+        bus.on("test", "not a function" as unknown as Function),
+      ).toThrow("Callback must be a function");
+      expect(() => bus.on("test", {} as unknown as Function)).toThrow(
+        "Callback must be a function",
+      );
     });
 
     it("should return unsubscribe function", () => {

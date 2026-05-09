@@ -1,5 +1,10 @@
 /// <reference types="jest" />
-import { initController, fetchWeather, getCurrentWeather, resetControllerState } from "./weatherController.ts";
+import {
+  initController,
+  fetchWeather,
+  getCurrentWeather,
+  resetControllerState,
+} from "./weatherController.ts";
 import { bus } from "./eventbus.ts";
 
 jest.mock("./weatherApiService.ts", () => ({
@@ -40,7 +45,9 @@ describe("weatherController", () => {
   const mockLocationModel = jest.requireMock("./locationModel.ts");
   const mockWeatherModel = jest.requireMock("./weatherModel.ts");
   const mockWeatherSearchView = jest.requireMock("./weatherSearchView.ts");
-  const mockWeatherStorage = jest.requireMock("./weatherStorageService.ts").weatherStorage;
+  const mockWeatherStorage = jest.requireMock(
+    "./weatherStorageService.ts",
+  ).weatherStorage;
   const mockRouter = jest.requireMock("./router.ts").router;
   const mockBus = jest.requireMock("./eventbus.ts").bus;
 
@@ -103,7 +110,10 @@ describe("weatherController", () => {
       await fetchWeather({ type: "auto" });
 
       expect(mockWeatherApi.getLocationByIP).toHaveBeenCalled();
-      expect(mockWeatherApi.getCurrentWeather).toHaveBeenCalledWith(51.5074, -0.1278);
+      expect(mockWeatherApi.getCurrentWeather).toHaveBeenCalledWith(
+        51.5074,
+        -0.1278,
+      );
     });
 
     it("should fetch weather for city location type", async () => {
@@ -141,7 +151,10 @@ describe("weatherController", () => {
       await fetchWeather({ type: "city", cityName: "Paris" });
 
       expect(mockWeatherApi.getLocationByCity).toHaveBeenCalledWith("Paris");
-      expect(mockWeatherApi.getCurrentWeather).toHaveBeenCalledWith(48.8566, 2.3522);
+      expect(mockWeatherApi.getCurrentWeather).toHaveBeenCalledWith(
+        48.8566,
+        2.3522,
+      );
     });
 
     it("should emit loadingStart event", async () => {
@@ -183,7 +196,11 @@ describe("weatherController", () => {
         visibility: 10,
         uvIndex: 3,
         realFeel: 14,
-        location: { key: "51.5074,-0.1278", name: "London", geo: { lat: 51.5074, lng: -0.1278 } },
+        location: {
+          key: "51.5074,-0.1278",
+          name: "London",
+          geo: { lat: 51.5074, lng: -0.1278 },
+        },
       });
 
       await fetchWeather({ type: "auto" });
@@ -230,7 +247,11 @@ describe("weatherController", () => {
         visibility: 10,
         uvIndex: 3,
         realFeel: 14,
-        location: { key: "51.5074,-0.1278", name: "London", geo: { lat: 51.5074, lng: -0.1278 } },
+        location: {
+          key: "51.5074,-0.1278",
+          name: "London",
+          geo: { lat: 51.5074, lng: -0.1278 },
+        },
       });
 
       await fetchWeather({ type: "auto" });
@@ -277,7 +298,11 @@ describe("weatherController", () => {
         visibility: 10,
         uvIndex: 3,
         realFeel: 14,
-        location: { key: "51.5074,-0.1278", name: "London", geo: { lat: 51.5074, lng: -0.1278 } },
+        location: {
+          key: "51.5074,-0.1278",
+          name: "London",
+          geo: { lat: 51.5074, lng: -0.1278 },
+        },
       });
 
       await fetchWeather({ type: "auto" });
@@ -348,7 +373,11 @@ describe("weatherController", () => {
         visibility: 10,
         uvIndex: 3,
         realFeel: 14,
-        location: { key: "51.5074,-0.1278", name: "London", geo: { lat: 51.5074, lng: -0.1278 } },
+        location: {
+          key: "51.5074,-0.1278",
+          name: "London",
+          geo: { lat: 51.5074, lng: -0.1278 },
+        },
       });
 
       await fetchWeather({ type: "auto" });
@@ -362,7 +391,7 @@ describe("weatherController", () => {
   describe("loadSavedData integration", () => {
     it("should load weather from router params when city is present", async () => {
       mockRouter.getCurrentParams.mockReturnValue({ city: "Moscow" });
-      
+
       const mockLocation = {
         key: "55.7558,37.6173",
         name: "Moscow",
@@ -394,8 +423,8 @@ describe("weatherController", () => {
       mockWeatherModel.createWeatherModel.mockReturnValue(mockWeather);
 
       initController();
-      
-      await new Promise(resolve => setTimeout(resolve, 10));
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
 
       expect(mockWeatherSearchView.setSearchType).toHaveBeenCalledWith("city");
       expect(mockWeatherSearchView.setCityName).toHaveBeenCalledWith("Moscow");
@@ -405,11 +434,11 @@ describe("weatherController", () => {
     it("should load weather from storage when no router params", async () => {
       mockRouter.getCurrentParams.mockReturnValue({});
       mockWeatherStorage.getLastCity.mockReturnValue("Berlin");
-      
+
       const mockLocation = {
         key: "52.5200,13.4050",
         name: "Berlin",
-        geo: { lat: 52.5200, lng: 13.4050 },
+        geo: { lat: 52.52, lng: 13.405 },
       };
       const mockWeatherData = {
         temperature: 10,
@@ -427,8 +456,8 @@ describe("weatherController", () => {
 
       mockWeatherApi.getLocationByCity.mockResolvedValue({
         name: "Berlin",
-        latitude: 52.5200,
-        longitude: 13.4050,
+        latitude: 52.52,
+        longitude: 13.405,
         country: "Germany",
         timezone: "Europe/Berlin",
       });
@@ -437,8 +466,8 @@ describe("weatherController", () => {
       mockWeatherModel.createWeatherModel.mockReturnValue(mockWeather);
 
       initController();
-      
-      await new Promise(resolve => setTimeout(resolve, 10));
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
 
       expect(mockWeatherStorage.getLastCity).toHaveBeenCalled();
       expect(mockWeatherSearchView.setSearchType).toHaveBeenCalledWith("city");
@@ -449,10 +478,10 @@ describe("weatherController", () => {
     it("should load auto weather when no router params and no storage", async () => {
       mockRouter.getCurrentParams.mockReturnValue({});
       mockWeatherStorage.getLastCity.mockReturnValue(null);
-      
+
       const mockIpLocation = {
         lat: 40.7128,
-        lon: -74.0060,
+        lon: -74.006,
         city: "New York",
         country: "USA",
         timezone: "America/New_York",
@@ -460,7 +489,7 @@ describe("weatherController", () => {
       const mockLocation = {
         key: "40.7128,-74.0060",
         name: "New York",
-        geo: { lat: 40.7128, lng: -74.0060 },
+        geo: { lat: 40.7128, lng: -74.006 },
       };
       const mockWeatherData = {
         temperature: 25,
@@ -482,8 +511,8 @@ describe("weatherController", () => {
       mockWeatherModel.createWeatherModel.mockReturnValue(mockWeather);
 
       initController();
-      
-      await new Promise(resolve => setTimeout(resolve, 10));
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
 
       expect(mockWeatherSearchView.setSearchType).toHaveBeenCalledWith("auto");
       expect(mockWeatherApi.getLocationByIP).toHaveBeenCalled();

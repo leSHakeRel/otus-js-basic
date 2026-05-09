@@ -42,11 +42,11 @@ interface WeatherModel {
 
 export function createWeatherModel(
   apiData: WeatherApiData,
-  location: Location
+  location: Location,
 ): WeatherModel {
   return {
     status: true,
-    message: '',
+    message: "",
     temperature: apiData.temperature,
     weatherText: apiData.weatherText,
     weatherIcon: apiData.weatherIcon,

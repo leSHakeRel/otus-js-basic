@@ -95,7 +95,9 @@ export async function getLocationByIP(): Promise<LocationData> {
  * @param cityName - название города
  * @returns город
  */
-export async function getLocationByCity(cityName: string): Promise<CitySearchResult> {
+export async function getLocationByCity(
+  cityName: string,
+): Promise<CitySearchResult> {
   const url = new URL(`${apiConfig.OPEN_METEO_BASE_URL}/search`);
   url.searchParams.append("name", cityName);
   url.searchParams.append("count", "1");
@@ -125,7 +127,7 @@ export async function getLocationByCity(cityName: string): Promise<CitySearchRes
  */
 export async function getCurrentWeather(
   lat: number,
-  lon: number
+  lon: number,
 ): Promise<WeatherData> {
   const url = new URL(`${apiConfig.OPEN_METEO_WEATHER_URL}/forecast`);
   url.searchParams.append("latitude", lat.toString());
@@ -133,7 +135,7 @@ export async function getCurrentWeather(
   url.searchParams.append("current_weather", "true");
   url.searchParams.append(
     "hourly",
-    "temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,pressure_msl,visibility"
+    "temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,pressure_msl,visibility",
   );
   url.searchParams.append("timezone", "auto");
 
@@ -143,7 +145,7 @@ export async function getCurrentWeather(
     throw new Error(`HTTP ошибка! Статус: ${response.status}`);
   }
 
-  const data = await response.json() as CurrentWeatherResponse;
+  const data = (await response.json()) as CurrentWeatherResponse;
 
   if (!data.current_weather) {
     throw new Error("Данные о погоде не найдены");

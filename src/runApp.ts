@@ -39,7 +39,7 @@ export function runApp(element: HTMLElement) {
     type: "auto" | "city";
     cityName?: string;
   }
-  
+
   bus.on("search:submit", (searchData: SearchData) => {
     weatherController.fetchWeather(searchData);
   });

@@ -30,7 +30,11 @@ describe("view", () => {
     });
 
     it("should add multiple classes to element", () => {
-      const result = addElement(container, "div", "", ["class1", "class2", "class3"]);
+      const result = addElement(container, "div", "", [
+        "class1",
+        "class2",
+        "class3",
+      ]);
 
       expect(result?.classList.contains("class1")).toBe(true);
       expect(result?.classList.contains("class2")).toBe(true);
@@ -38,12 +42,22 @@ describe("view", () => {
     });
 
     it("should return null when container is null", () => {
-      const result = addElement(null as unknown as HTMLElement, "p", "test", "");
+      const result = addElement(
+        null as unknown as HTMLElement,
+        "p",
+        "test",
+        "",
+      );
       expect(result).toBeNull();
     });
 
     it("should return null when container is undefined", () => {
-      const result = addElement(undefined as unknown as HTMLElement, "p", "test", "");
+      const result = addElement(
+        undefined as unknown as HTMLElement,
+        "p",
+        "test",
+        "",
+      );
       expect(result).toBeNull();
     });
 
@@ -53,7 +67,12 @@ describe("view", () => {
     });
 
     it("should return null when elementName is undefined", () => {
-      const result = addElement(container, undefined as unknown as string, "", "");
+      const result = addElement(
+        container,
+        undefined as unknown as string,
+        "",
+        "",
+      );
       expect(result).toBeNull();
     });
 
@@ -63,17 +82,32 @@ describe("view", () => {
     });
 
     it("should not return null when elementContent is undefined", () => {
-      const result = addElement(container, "p", undefined as unknown as string, "");
+      const result = addElement(
+        container,
+        "p",
+        undefined as unknown as string,
+        "",
+      );
       expect(result).not.toBeNull();
     });
 
     it("should return null when className is null", () => {
-      const result = addElement(container, "p", "test", null as unknown as string | string[]);
+      const result = addElement(
+        container,
+        "p",
+        "test",
+        null as unknown as string | string[],
+      );
       expect(result).toBeNull();
     });
 
     it("should not return null when className is undefined", () => {
-      const result = addElement(container, "p", "test", undefined as unknown as string | string[]);
+      const result = addElement(
+        container,
+        "p",
+        "test",
+        undefined as unknown as string | string[],
+      );
       expect(result).not.toBeNull();
     });
 

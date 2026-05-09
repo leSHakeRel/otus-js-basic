@@ -58,7 +58,12 @@ export function renderWeatherResult(container: HTMLElement): void {
   subscribers.forEach((unsubscribe) => unsubscribe());
   subscribers = [];
   const mainSection = addElement(container, "section", "", "resultSection")!;
-  const cityName = addElement(mainSection, "div", "", "resultSection-cityName")!;
+  const cityName = addElement(
+    mainSection,
+    "div",
+    "",
+    "resultSection-cityName",
+  )!;
   const cityBlockText = addElement(cityName, "div", "", "cityName-block-text")!;
   addElement(cityBlockText, "p", "", "cityName-text");
 

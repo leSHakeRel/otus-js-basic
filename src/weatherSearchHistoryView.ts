@@ -61,11 +61,17 @@ class WeatherSearchHistoryView {
     if (!this.container) return;
 
     this.container.addEventListener("click", (e) => {
-      if (e.target instanceof HTMLElement && e.target.classList.contains("clear-history-btn")) {
+      if (
+        e.target instanceof HTMLElement &&
+        e.target.classList.contains("clear-history-btn")
+      ) {
         this.controller?.clearHistory();
       }
 
-      if (e.target instanceof HTMLElement && e.target.classList.contains("remove-history-item")) {
+      if (
+        e.target instanceof HTMLElement &&
+        e.target.classList.contains("remove-history-item")
+      ) {
         const city = e.target.dataset.city;
         if (city) {
           this.controller?.removeCity(city);
@@ -94,7 +100,7 @@ class WeatherSearchHistoryView {
    */
   private renderHistory(history: string[]): void {
     if (!this.elements.historyList) return;
-    
+
     this.elements.historyList.innerHTML = `
       <div class="history-items">
         ${history.map((city, index) => this.renderHistoryItem(city, index)).join("")}
@@ -131,7 +137,7 @@ class WeatherSearchHistoryView {
    */
   private renderEmpty(): void {
     if (!this.elements.historyList) return;
-    
+
     this.elements.historyList.innerHTML = `
       <div class="empty-history">
         <p>История поиска пуста</p>

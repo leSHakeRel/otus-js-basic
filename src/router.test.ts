@@ -112,7 +112,11 @@ describe("Router", () => {
 
   describe("getCurrentParams", () => {
     it("should return current route params", () => {
-      router["currentRoute"] = { pattern: "/test", pathname: "/test", params: { city: "moscow" } };
+      router["currentRoute"] = {
+        pattern: "/test",
+        pathname: "/test",
+        params: { city: "moscow" },
+      };
 
       const params = router.getCurrentParams();
 
@@ -128,7 +132,11 @@ describe("Router", () => {
 
   describe("getCurrentPath", () => {
     it("should return current route path", () => {
-      router["currentRoute"] = { pattern: "/test", pathname: "/test", params: {} };
+      router["currentRoute"] = {
+        pattern: "/test",
+        pathname: "/test",
+        params: {},
+      };
 
       const path = router.getCurrentPath();
 
@@ -144,7 +152,11 @@ describe("Router", () => {
 
   describe("getCurrentPattern", () => {
     it("should return current route pattern", () => {
-      router["currentRoute"] = { pattern: "/weather/:city", pathname: "/weather/moscow", params: { city: "moscow" } };
+      router["currentRoute"] = {
+        pattern: "/weather/:city",
+        pathname: "/weather/moscow",
+        params: { city: "moscow" },
+      };
 
       const pattern = router.getCurrentPattern();
 
@@ -197,8 +209,10 @@ describe("Router", () => {
 
     it("should navigate using history API when useHashRouting is false", () => {
       router["useHashRouting"] = false;
-      const pushStateSpy = jest.spyOn(window.history, "pushState").mockImplementation();
-      
+      const pushStateSpy = jest
+        .spyOn(window.history, "pushState")
+        .mockImplementation();
+
       router.navigate("/test");
 
       expect(pushStateSpy).toHaveBeenCalledWith({}, "", "/test");
@@ -207,8 +221,10 @@ describe("Router", () => {
 
     it("should navigate using history API with replace when useHashRouting is false", () => {
       router["useHashRouting"] = false;
-      const replaceStateSpy = jest.spyOn(window.history, "replaceState").mockImplementation();
-      
+      const replaceStateSpy = jest
+        .spyOn(window.history, "replaceState")
+        .mockImplementation();
+
       router.navigate("/test", { replace: true });
 
       expect(replaceStateSpy).toHaveBeenCalledWith({}, "", "/test");
@@ -261,7 +277,11 @@ describe("Router", () => {
     it("should not call handler when route is already active", async () => {
       const handler = jest.fn().mockResolvedValue(undefined);
       router.addRoute("/test", handler);
-      router["currentRoute"] = { pattern: "/test", pathname: "/test", params: {} };
+      router["currentRoute"] = {
+        pattern: "/test",
+        pathname: "/test",
+        params: {},
+      };
 
       await router.route("/test");
 
@@ -270,7 +290,9 @@ describe("Router", () => {
 
     it("should call showError when route handler throws error", async () => {
       const handler = jest.fn().mockRejectedValue(new Error("Route error"));
-      const showErrorSpy = jest.spyOn(router as any, "showError").mockImplementation();
+      const showErrorSpy = jest
+        .spyOn(router as any, "showError")
+        .mockImplementation();
       router.addRoute("/test", handler);
 
       await router.route("/test");
@@ -280,8 +302,12 @@ describe("Router", () => {
     });
 
     it("should call showError when notFoundHandler throws error", async () => {
-      const notFoundHandler = jest.fn().mockRejectedValue(new Error("404 error"));
-      const showErrorSpy = jest.spyOn(router as any, "showError").mockImplementation();
+      const notFoundHandler = jest
+        .fn()
+        .mockRejectedValue(new Error("404 error"));
+      const showErrorSpy = jest
+        .spyOn(router as any, "showError")
+        .mockImplementation();
       router.setNotFoundHandler(notFoundHandler);
 
       await router.route("/non-existent");
@@ -413,7 +439,11 @@ describe("Router", () => {
 
   describe("isActive", () => {
     it("should return true when current path matches exactly", () => {
-      router["currentRoute"] = { pattern: "/about", pathname: "/about", params: {} };
+      router["currentRoute"] = {
+        pattern: "/about",
+        pathname: "/about",
+        params: {},
+      };
 
       const result = router.isActive("/about", true);
 
@@ -421,7 +451,11 @@ describe("Router", () => {
     });
 
     it("should return false when current path does not match exactly", () => {
-      router["currentRoute"] = { pattern: "/about", pathname: "/about", params: {} };
+      router["currentRoute"] = {
+        pattern: "/about",
+        pathname: "/about",
+        params: {},
+      };
 
       const result = router.isActive("/contact", true);
 
@@ -429,7 +463,11 @@ describe("Router", () => {
     });
 
     it("should return true when current path starts with target path (non-exact)", () => {
-      router["currentRoute"] = { pattern: "/weather/moscow", pathname: "/weather/moscow", params: { city: "moscow" } };
+      router["currentRoute"] = {
+        pattern: "/weather/moscow",
+        pathname: "/weather/moscow",
+        params: { city: "moscow" },
+      };
 
       const result = router.isActive("/weather", false);
 
@@ -437,7 +475,11 @@ describe("Router", () => {
     });
 
     it("should return false when current path does not start with target path (non-exact)", () => {
-      router["currentRoute"] = { pattern: "/about", pathname: "/about", params: {} };
+      router["currentRoute"] = {
+        pattern: "/about",
+        pathname: "/about",
+        params: {},
+      };
 
       const result = router.isActive("/weather", false);
 
@@ -461,7 +503,7 @@ describe("Router", () => {
       document.body.appendChild(link);
 
       const navigateSpy = jest.spyOn(router, "navigate").mockImplementation();
-      
+
       link.click();
 
       expect(navigateSpy).toHaveBeenCalledWith("/test");
@@ -475,7 +517,7 @@ describe("Router", () => {
       document.body.appendChild(link);
 
       const navigateSpy = jest.spyOn(router, "navigate").mockImplementation();
-      
+
       link.click();
 
       expect(navigateSpy).not.toHaveBeenCalled();
@@ -487,8 +529,10 @@ describe("Router", () => {
     it("should call handleRouteChange when popstate event fires", () => {
       router["useHashRouting"] = false;
       window.addEventListener = originalWindowAddEventListener;
-      
-      const handleRouteChangeSpy = jest.spyOn(router, "handleRouteChange").mockImplementation();
+
+      const handleRouteChangeSpy = jest
+        .spyOn(router, "handleRouteChange")
+        .mockImplementation();
 
       window.addEventListener("popstate", () => {
         router.handleRouteChange();

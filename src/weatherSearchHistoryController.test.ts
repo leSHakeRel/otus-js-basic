@@ -39,7 +39,10 @@ describe("weatherSearchHistoryController", () => {
     it("should call view render with container and controller", () => {
       historyController.init(container);
 
-      expect(historyView.render).toHaveBeenCalledWith(container, historyController);
+      expect(historyView.render).toHaveBeenCalledWith(
+        container,
+        historyController,
+      );
     });
   });
 
@@ -66,7 +69,7 @@ describe("weatherSearchHistoryController", () => {
   describe("clearHistory", () => {
     it("should call model clearHistory when confirmed", () => {
       (window.confirm as jest.Mock) = jest.fn(() => true);
-      
+
       historyController.clearHistory();
 
       expect(historyModel.clearHistory).toHaveBeenCalled();
@@ -74,7 +77,7 @@ describe("weatherSearchHistoryController", () => {
 
     it("should not clear history when not confirmed", () => {
       (window.confirm as jest.Mock) = jest.fn(() => false);
-      
+
       historyController.clearHistory();
 
       expect(historyModel.clearHistory).not.toHaveBeenCalled();
@@ -84,7 +87,7 @@ describe("weatherSearchHistoryController", () => {
   describe("removeCity", () => {
     it("should call model removeCity when confirmed", () => {
       (window.confirm as jest.Mock) = jest.fn(() => true);
-      
+
       historyController.removeCity("Moscow");
 
       expect(historyModel.removeCity).toHaveBeenCalledWith("Moscow");
@@ -92,7 +95,7 @@ describe("weatherSearchHistoryController", () => {
 
     it("should not remove city when not confirmed", () => {
       (window.confirm as jest.Mock) = jest.fn(() => false);
-      
+
       historyController.removeCity("Moscow");
 
       expect(historyModel.removeCity).not.toHaveBeenCalled();
@@ -118,7 +121,7 @@ describe("weatherSearchHistoryController", () => {
   describe("isEmpty", () => {
     it("should return true when history is empty", () => {
       historyModel.isEmpty = jest.fn(() => true);
-      
+
       const result = historyController.isEmpty();
 
       expect(result).toBe(true);
@@ -126,7 +129,7 @@ describe("weatherSearchHistoryController", () => {
 
     it("should return false when history is not empty", () => {
       historyModel.isEmpty = jest.fn(() => false);
-      
+
       const result = historyController.isEmpty();
 
       expect(result).toBe(false);

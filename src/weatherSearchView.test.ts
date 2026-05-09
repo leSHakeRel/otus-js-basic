@@ -1,5 +1,9 @@
 /// <reference types="jest" />
-import { renderWeatherSearch, setCityName, setSearchType } from "./weatherSearchView.ts";
+import {
+  renderWeatherSearch,
+  setCityName,
+  setSearchType,
+} from "./weatherSearchView.ts";
 import { bus } from "./eventbus.ts";
 
 describe("weatherSearchView", () => {
@@ -51,17 +55,19 @@ describe("weatherSearchView", () => {
   describe("setCityName", () => {
     it("should set city name in input", () => {
       renderWeatherSearch(container);
-      
+
       setCityName("Moscow");
 
-      const cityNameInput = container.querySelector(".cityNameInput") as HTMLInputElement;
+      const cityNameInput = container.querySelector(
+        ".cityNameInput",
+      ) as HTMLInputElement;
       expect(cityNameInput.value).toBe("Moscow");
     });
 
     it("should not set city name if input not found", () => {
       const newContainer = document.createElement("div");
       document.body.appendChild(newContainer);
-      
+
       setCityName("London");
 
       expect(newContainer.innerHTML).toBe("");
@@ -72,11 +78,13 @@ describe("weatherSearchView", () => {
   describe("setSearchType", () => {
     it("should set search type to auto", () => {
       renderWeatherSearch(container);
-      
+
       setSearchType("auto");
 
       const ipRadio = container.querySelector("#ipSearch") as HTMLInputElement;
-      const cityRadio = container.querySelector("#cityNameSearch") as HTMLInputElement;
+      const cityRadio = container.querySelector(
+        "#cityNameSearch",
+      ) as HTMLInputElement;
 
       expect(ipRadio.checked).toBe(true);
       expect(cityRadio.checked).toBe(false);
@@ -84,11 +92,13 @@ describe("weatherSearchView", () => {
 
     it("should set search type to city", () => {
       renderWeatherSearch(container);
-      
+
       setSearchType("city");
 
       const ipRadio = container.querySelector("#ipSearch") as HTMLInputElement;
-      const cityRadio = container.querySelector("#cityNameSearch") as HTMLInputElement;
+      const cityRadio = container.querySelector(
+        "#cityNameSearch",
+      ) as HTMLInputElement;
 
       expect(ipRadio.checked).toBe(false);
       expect(cityRadio.checked).toBe(true);
@@ -96,9 +106,11 @@ describe("weatherSearchView", () => {
 
     it("should toggle city input visibility based on search type", () => {
       renderWeatherSearch(container);
-      
+
       setSearchType("city");
-      const cityNameInput = container.querySelector(".cityNameInput") as HTMLInputElement;
+      const cityNameInput = container.querySelector(
+        ".cityNameInput",
+      ) as HTMLInputElement;
       expect(cityNameInput.style.display).toBe("block");
 
       setSearchType("auto");
@@ -109,12 +121,14 @@ describe("weatherSearchView", () => {
   describe("form submission", () => {
     it("should emit search:submit event with auto type", () => {
       renderWeatherSearch(container);
-      
+
       const submitSpy = jest.fn();
       bus.on("search:submit", submitSpy);
 
       const form = container.querySelector("#locationForm") as HTMLFormElement;
-      const submitButton = form.querySelector("input[type='submit']") as HTMLInputElement;
+      const submitButton = form.querySelector(
+        "input[type='submit']",
+      ) as HTMLInputElement;
       submitButton.click();
 
       expect(submitSpy).toHaveBeenCalledWith({
@@ -125,17 +139,21 @@ describe("weatherSearchView", () => {
 
     it("should emit search:submit event with city type", () => {
       renderWeatherSearch(container);
-      
+
       const submitSpy = jest.fn();
       bus.on("search:submit", submitSpy);
 
-      const cityRadio = container.querySelector("#cityNameSearch") as HTMLInputElement;
-      const cityNameInput = container.querySelector(".cityNameInput") as HTMLInputElement;
+      const cityRadio = container.querySelector(
+        "#cityNameSearch",
+      ) as HTMLInputElement;
+      const cityNameInput = container.querySelector(
+        ".cityNameInput",
+      ) as HTMLInputElement;
       const form = container.querySelector("#locationForm") as HTMLFormElement;
 
       cityRadio.checked = true;
       cityNameInput.value = "Paris";
-      
+
       const submitEvent = new Event("submit", { cancelable: true });
       form.dispatchEvent(submitEvent);
 
