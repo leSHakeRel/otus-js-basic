@@ -20,7 +20,11 @@ class EventBus {
    * @param {Object} options.context - Контекст функции обработчика
    * @returns {Function} Функция для отписки
    */
-  on(event: string, callback: Function, options: { once?: boolean; context?: any } = {}): () => void {
+  on(
+    event: string,
+    callback: Function,
+    options: { once?: boolean; context?: unknown } = {},
+  ): () => void {
     if (typeof callback !== "function") {
       throw new Error("Callback must be a function");
     }
@@ -44,7 +48,11 @@ class EventBus {
   /**
    * Подписка на событие с выполнением только один раз
    */
-  once(event: string, callback: Function, options: { context?: unknown } = {}): () => void {
+  once(
+    event: string,
+    callback: Function,
+    options: { context?: unknown } = {},
+  ): () => void {
     return this.on(event, callback, { ...options, once: true });
   }
 
@@ -94,9 +102,8 @@ class EventBus {
     }
 
     if (hasOnceListeners) {
-      const remaining = this.events
-        .get(event)
-        ?.filter((listener) => !listener.once) || [];
+      const remaining =
+        this.events.get(event)?.filter((listener) => !listener.once) || [];
 
       if (remaining.length === 0) {
         this.events.delete(event);
@@ -135,9 +142,8 @@ class EventBus {
 
     // Удаляем одноразовые обработчики
     if (hasOnceListeners) {
-      const remaining = this.events
-        .get(event)
-        ?.filter((listener) => !listener.once) || [];
+      const remaining =
+        this.events.get(event)?.filter((listener) => !listener.once) || [];
 
       if (remaining.length === 0) {
         this.events.delete(event);
